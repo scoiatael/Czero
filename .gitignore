@@ -1,6 +1,9 @@
 # Parser generator
 maphoon
 
+# External libs
+lib
+
 # Makefile
 Makefile
 
@@ -14,3 +17,6 @@ CMakeScripts
 Makefile
 cmake_install.cmake
 install_manifest.txt
+
+# ycmd
+.ycm_extra_conf.pyc
