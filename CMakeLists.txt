@@ -1,10 +1,11 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.0)
 project (CZero)
 
 set(lib ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(maphoon_root ${CMAKE_CURRENT_BINARY_DIR}/maphoon)
 set(bin ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(parser ${CMAKE_CURRENT_SOURCE_DIR}/parser)
+set(build ${CMAKE_CURRENT_SOURCE_DIR}/build)
 
 set(parser_files
   parser.cpp
@@ -50,5 +51,8 @@ foreach(index 0 1 2 3)
 endforeach(index)
 
 include_directories(AFTER SYSTEM ${parser})
+
+add_custom_target(extra-clean
+                   COMMAND rm -rf ${build} && mkdir ${build} && touch ${build}/.keep )
 
 add_executable(czero ${source} ${final_parser_files})
