@@ -1,4 +1,7 @@
-# Template for projects based on Maphoon
+# This is going to be a simple imperative language compiler
+
+Based on maphoon parser and translating to llvm IR.
+More updates this file are about to come soon.
 
 All commands assume CWD is repository root.
 

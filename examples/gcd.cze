@@ -1,0 +1,12 @@
+fun gcd (a : int, b : int) : int {
+    var c : int;  
+    // in LLVM IR stack allocation must happen at the beginning of a function
+    // let's keep things simple and limit where new variables
+    // can be introduced!
+    while (a != 0) {
+        c := a;
+        a := b % a;
+        b := c;
+    } // will have to introduce phi operator for a, b, c 
+    return b;
+}

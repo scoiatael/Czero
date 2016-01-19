@@ -1,0 +1,5 @@
+fun main() // found no return type? generate `ret void` in LLVM IR
+           // harder version - infer return type?
+{
+    println("Hello world!"); // so this literal is char[], allocated in .data
+}
