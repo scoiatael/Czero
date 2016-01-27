@@ -10,6 +10,8 @@ namespace ir_compiler {
   struct Options {
     bool remove_ir_file;
     std::string output_file_path;
+    std::ostream& err = std::cerr;
+    std::ostream& log = std::cout;
   };
 
   int compile(std::string ir_file_path, const Options& options = Options());

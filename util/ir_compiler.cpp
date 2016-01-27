@@ -2,7 +2,7 @@
 
 int ir_compiler::compile(std::string ir_file_path, const Options& options) {
   if (!boost::filesystem::exists(ir_file_path)) {
-    std::cerr << "No such file: " << ir_file_path << "\n";
+    options.err << "No such file: " << ir_file_path << "\n";
     return EXIT_FAILURE;
   }
 
@@ -20,7 +20,7 @@ int ir_compiler::compile(std::string ir_file_path, const Options& options) {
   };
 
   auto clang_invocation = boost::algorithm::join(clang_arguments, " ");
-  std::cout << clang_invocation;
+  options.log << "Running: " << clang_invocation;
   system(clang_invocation.c_str());
 
   if(!options.remove_ir_file)  return EXIT_SUCCESS;
