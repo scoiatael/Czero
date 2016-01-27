@@ -29,6 +29,7 @@ endforeach(file)
 
 include(ExternalProject)
 ExternalProject_Add(Maphoon
+  UPDATE_COMMAND "" 
   PREFIX maphoon
   GIT_REPOSITORY git@bitbucket.org:lukaszCzaplinski/maphoon.git
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>)
