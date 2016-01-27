@@ -9,5 +9,10 @@
 
 #include "parser/parser.h"
 #include "util/ir_compiler.hpp"
+#include "util/ir_generator.hpp"
+
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/raw_os_ostream.h"
 
 #endif
