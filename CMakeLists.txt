@@ -5,6 +5,7 @@ set(lib ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(maphoon_root ${CMAKE_CURRENT_BINARY_DIR}/maphoon)
 set(bin ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(parser ${CMAKE_CURRENT_SOURCE_DIR}/parser)
+set(util ${CMAKE_CURRENT_SOURCE_DIR}/util)
 set(build ${CMAKE_CURRENT_SOURCE_DIR}/build)
 
 set(parser_files
@@ -15,6 +16,7 @@ set(parser_files
 
 set(source
   czero.cpp
+  ${util}/ir_compiler.cpp
   ${parser}/tokenizer.cpp)
 
 set(maphoon_files "")
@@ -26,6 +28,9 @@ set(final_parser_files "")
 foreach(file ${parser_files})
   list(APPEND final_parser_files ${parser}/${file})
 endforeach(file)
+
+find_package( Boost 1.40 COMPONENTS program_options filesystem system REQUIRED )
+include_directories( ${Boost_INCLUDE_DIR} )
 
 include(ExternalProject)
 ExternalProject_Add(Maphoon
@@ -57,3 +62,7 @@ add_custom_target(extra-clean
                    COMMAND rm -rf ${build} && mkdir ${build} && touch ${build}/.keep )
 
 add_executable(czero ${source} ${final_parser_files})
+
+set_property(TARGET czero PROPERTY CXX_STANDARD 11)
+set_property(TARGET czero PROPERTY CXX_STANDARD_REQUIRED ON)
+target_link_libraries( czero ${Boost_LIBRARIES} )

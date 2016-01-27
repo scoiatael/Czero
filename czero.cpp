@@ -1,5 +1,6 @@
 #include "czero.h"
 
-int main() {
-  std::cout << "Hello world!" << std::endl;
+int main(int argc, char *argv[]) {
+  auto file_path = std::string(argv[1]);
+  ir_compiler::compile(file_path);
 }
