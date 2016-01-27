@@ -6,7 +6,7 @@ ir_generator::Context::Context(std::string name) {
   this->currentModule = std::move(module);
 }
 
-int ir_generator::generate_example_code(ir_generator::Context& ctx) {
+int ir_generator::generate_example_code(ir_generator::Context& ctx, const Options& options) {
   auto int8t = llvm::Type::getInt8Ty(ctx.llvmContext);
   auto int8ptrt = llvm::PointerType::getUnqual(int8t);
   auto printf_argst = std::vector<llvm::Type*>(1, int8ptrt);
@@ -29,7 +29,6 @@ int ir_generator::generate_example_code(ir_generator::Context& ctx) {
   ctx.Builder.SetInsertPoint(block);
 
   auto helloWorld = ctx.Builder.CreateGlobalStringPtr("hello world!\n");
-
   auto printf_args = std::vector< llvm::Value* >(1, helloWorld);
 
   ctx.Builder.CreateCall(printf_func, printf_args, "calltmp");
@@ -37,22 +36,38 @@ int ir_generator::generate_example_code(ir_generator::Context& ctx) {
   auto main_return_value = llvm::ConstantInt::get(main_returnt, 0);
   ctx.Builder.CreateRet(main_return_value);
 
-  ctx.currentModule->dump();
-  auto main_ok = !llvm::verifyFunction(*main_func, &llvm::errs());
-  std::cout << "Main function verification: " << (main_ok ? "OK" : "Failed") << std::endl;
+  if (options.verbose) {
+    ctx.currentModule->dump();
+  }
+  auto main_ok = true;
+  if (options.verify) {
+    main_ok = !llvm::verifyFunction(*main_func, &options.err);
+    if (options.verbose || !main_ok) {
+      options.log << "Main function verification: " << (main_ok ? "OK" : "Failed") << "\n";
+    }
+  }
   return main_ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-int ir_generator::print_module(std::string file_path, ir_generator::Context& ctx) {
+int ir_generator::print_module(std::string file_path, ir_generator::Context& ctx, const Options& options) {
   std::error_code ec;
-  llvm::raw_fd_ostream raw_output(file_path, ec, llvm::sys::fs::F_Text | llvm::sys::fs::F_Excl);
+  auto flags = llvm::sys::fs::F_Text;
+  if (!options.force_overwrite) {
+    flags = flags | llvm::sys::fs::F_Excl;
+  }
+  llvm::raw_fd_ostream raw_output(file_path, ec, flags);
   ctx.currentModule->print(raw_output, nullptr);
   if(ec) {
-    std::cerr << ec.message() << std::endl;
+    options.err << "Failed printing module: " << ec.message() << "\n";
     return EXIT_FAILURE;
   }
 
-  auto main_ok = !llvm::verifyModule(*ctx.currentModule, &llvm::errs());
-  std::cout << "Main module verification: " << (main_ok ? "OK" : "Failed") << std::endl;
+  auto main_ok = true;
+  if(options.verify) {
+    main_ok = !llvm::verifyModule(*ctx.currentModule, &options.err);
+    if (options.verbose || !main_ok) {
+      options.log << "Main module verification: " << (main_ok ? "OK" : "Failed") << "\n";
+    }
+  }
   return main_ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

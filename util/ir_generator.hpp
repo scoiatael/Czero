@@ -16,10 +16,11 @@
 
 namespace ir_generator {
   struct Options {
-    bool remove_ir_file;
-    std::string output_file_path;
-    std::ostream& err = std::cerr;
-    std::ostream& log = std::cout;
+    bool verbose = false;
+    bool verify = true;
+    bool force_overwrite = false;
+    llvm::raw_ostream& err = llvm::errs();
+    llvm::raw_ostream& log = llvm::outs();
   };
 
   struct Context {
@@ -31,8 +32,8 @@ namespace ir_generator {
 
   };
 
-  int print_module(std::string file_path, Context& ctx);
-  int generate_example_code(Context& ctx);
+  int print_module(std::string file_path, Context& ctx, const Options& options = Options());
+  int generate_example_code(Context& ctx, const Options& options = Options());
 }
 
 #endif

@@ -20,7 +20,7 @@ int ir_compiler::compile(std::string ir_file_path, const Options& options) {
   };
 
   auto clang_invocation = boost::algorithm::join(clang_arguments, " ");
-  options.log << "Running: " << clang_invocation;
+  if(options.verbose) options.log << "Running: " << clang_invocation;
   system(clang_invocation.c_str());
 
   if(!options.remove_ir_file)  return EXIT_SUCCESS;
