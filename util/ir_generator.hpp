@@ -8,6 +8,10 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Verifier.h>
 
+#include <llvm/Support/FileSystem.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/raw_os_ostream.h>
+
 #include <memory>
 
 namespace ir_generator {
@@ -23,9 +27,12 @@ namespace ir_generator {
     llvm::LLVMContext &llvmContext = llvm::getGlobalContext();
     llvm::IRBuilder<> Builder = llvm::IRBuilder<>(llvmContext);
 
-    Context(std::unique_ptr<llvm::Module>& currentModule);
+    Context(std::string name);
 
   };
+
+  int print_module(std::string file_path, Context& ctx);
+  int generate_example_code(Context& ctx);
 }
 
 #endif
