@@ -9,22 +9,13 @@
 %token SEMICOLON BECOMES COMMA
 %token IDENTIFIER NUMBER
 %token PLUS TIMES MINUS DIVIDES
-%token FACTORIAL
 %token LPAR RPAR
 
 
-%startsymbol S EOF
+%startsymbol PROG EOF
 
 
-% S : S PLUS T
-%   | T
+% PROG : TOP PROG
+%   |
 %   ;
 
-
-% T : T TIMES U
-%   | U
-%   ;
-
-% U : IDENTIFIER
-%   | LPAR S RPAR
-%   ;
