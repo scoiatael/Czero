@@ -10,5 +10,6 @@
 #include "parser/parser.h"
 #include "util/ir_compiler.hpp"
 #include "util/ir_generator.hpp"
+#include "syntax/ast.hpp"
 
 #endif
