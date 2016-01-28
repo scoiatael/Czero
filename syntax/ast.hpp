@@ -3,105 +3,138 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 namespace ast {
   int generate_new_id();
 
-  enum Type { Int32, Float32, Bool };
+  namespace types {
+    enum Type { Int32, Float32, Bool };
 
-  class Node {
-    int id { generate_new_id() };
+    namespace abstract {
+      class Value {};
+    };
+
+    class BoolValue : public abstract::Value {
+      bool value;
+    };
+    class FloatValue : public abstract::Value {
+      float value;
+    };
+    class IntBalue : public abstract::Value {
+      int value;
+    };
   };
 
-  class Statement : public Node {
+  enum RealNodeTypes {
+    VariableNode,
+    ExternNode,
+    FuncNode,
+    ConstantNode,
+    CastNode,
+    UnOpNode,
+    BinOpNode,
+    CallNode,
+    ReturnNode,
+    BranchNode,
+    AssignmentNode,
+    WhileNode
   };
 
-  class Declaration : public Node {
+  namespace abstract {
+    class Node {
+      // Id for this node
+      int id { generate_new_id() };
+      // Return RealNodeType for this node
+      virtual operator int() = 0;
+    };
 
-  };
+    class Statement : public Node {};
 
-  class Operation : public Node {
-    Type type;
-  };
+    class Declaration : public Node {};
+
+    class Operation : public Node {
+      types::Type type;
+    };
+  }
 
   typedef std::string Identifier;
 
-  class Variable : public Operation {
+  typedef std::vector<std::unique_ptr<abstract::Statement>> Body;
+
+  struct Variable : public abstract::Operation {
     Identifier identifier;
+    operator int() { return VariableNode; }
   };
 
-  class Extern : public Declaration {
-    Type return_value;
+  struct Extern : public abstract::Declaration {
+    types::Type return_value;
     std::vector<Variable> arguments;
+    operator int() { return ExternNode; }
   };
 
-  typedef std::vector<Statement> Body;
-
-  class Func : public Declaration {
+  struct Func : public Extern {
     Body body;
     std::vector<Variable> variables;
+    operator int() { return FuncNode; }
   };
 
-  class Value {};
-
-  class Constant : public Operation {
-    Value value;
+  struct Constant : public abstract::Operation {
+    types::abstract::Value value;
+    operator int() { return ConstantNode; }
   };
 
-  class Cast : public Operation {
-    Type to;
-    Operation value;
+  struct Cast : public abstract::Operation {
+    types::Type to;
+    std::unique_ptr<abstract::Operation> value;
+    operator int() { return CastNode; }
   };
 
-  class UnOp : public Operation {
+  struct UnOp : public abstract::Operation {
     Identifier operator_;
-    Operation Body;
+    std::unique_ptr<abstract::Operation> Body;
+    operator int() { return UnOpNode; }
   };
 
-  class BinOp : public Operation {
+  struct BinOp : public abstract::Operation {
     Identifier operator_;
-    Operation left;
-    Operation right;
+    std::unique_ptr<abstract::Operation> left;
+    std::unique_ptr<abstract::Operation> right;
+    operator int() { return BinOpNode; }
   };
 
-  class Return : public Operation {
-    Operation value;
-  };
-
-  class Call : public Operation {
+  struct Call : public abstract::Operation {
     Identifier function_name;
-    std::vector<Operation> arguments;
+    std::vector<std::unique_ptr<abstract::Operation>> arguments;
+    operator int() { return CallNode; }
   };
 
-  class Branch : public Statement {
-    Operation condition;
+  struct Return : public abstract::Statement {
+    std::unique_ptr<abstract::Operation> value;
+    operator int() { return ReturnNode; }
+  };
+
+  struct Branch : public abstract::Statement {
+    std::unique_ptr<abstract::Operation> condition;
     Body then_;
     Body else_;
+    operator int() { return BranchNode; }
   };
 
-  class Assignment : public Statement {
+  struct Assignment : public abstract::Statement {
     Identifier identifier;
-    Operation value;
+    std::unique_ptr<abstract::Operation> value;
+    operator int() { return AssignmentNode; }
   };
 
-  class While : public Statement {
-    Operation condition;
+  struct While : public abstract::Statement {
+    std::unique_ptr<abstract::Operation> condition;
     Body body;
+    operator int() { return WhileNode; }
   };
 
-  class Program {
-    Body body;
-  };
-
-
-  class BoolValue : public Value {
-    bool value;
-  };
-  class FloatValue : public Value {
-    float value;
-  };
-  class IntBalue : public Value {
-    int value;
+  struct Program {
+    std::vector<std::unique_ptr<abstract::Declaration>> body;
   };
 }
 
