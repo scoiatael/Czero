@@ -3,7 +3,8 @@
 
 %attribute id            std::string
 %attribute reason        std::string
-%attribute value         int
+%attribute intval        int
+%attribute floatval      float
 
 %token EOF SCANERROR
 %token SEMICOLON COLON COMMA

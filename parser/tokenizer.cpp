@@ -53,14 +53,15 @@ void tokenizer::scan( )
    if( r. lookahead == ':' )
    {
       lookahead. push_back( tkn_COLON );
+      r. moveforward( );
       return;
    }
 
 
    if( r. lookahead == ',' )
    {
-      r. moveforward( );
       lookahead. push_back( tkn_COMMA );
+      r. moveforward( );
       return;
    }
 
@@ -123,8 +124,8 @@ void tokenizer::scan( )
          lookahead.push_back(tkn_WHILE);
       else
       {
-         lookahead.back().id.push_back(name);
          lookahead.push_back(tkn_IDENTIFIER);
+         lookahead.back().id.push_back(name);
       }
 
       return;
@@ -134,6 +135,7 @@ void tokenizer::scan( )
    if( isdigit( r. lookahead ))
    {
       std::string s;
+      bool isfloat = false;
          // We keep the string, so that we can put it in
          // a scanerror, if necessary.
 
@@ -151,6 +153,7 @@ void tokenizer::scan( )
 
       if( r. lookahead == '.' )
       {
+         isfloat = true;
          double pos = 0.1;
 
          s += r. lookahead;
@@ -234,8 +237,16 @@ void tokenizer::scan( )
 
      }
 
-     lookahead. push_back( tkn_NUMBER );
-     lookahead. back( ). value. push_back( val );
+     if(isfloat)
+     {
+         lookahead.push_back(tkn_FLOAT);
+         lookahead.back().floatval.push_back(val);
+     }
+     else
+     {
+         lookahead.push_back(tkn_INT);
+         lookahead.back().intval.push_back((int)val);
+     }
      return;
    }
 

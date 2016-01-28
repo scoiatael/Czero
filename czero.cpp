@@ -1,10 +1,25 @@
 #include "czero.h"
+#include "assert.h"
+#include "parser/reader.h"
+#include "parser/tokenizer.h"
+#include "parser/parser.h"
 
 int main(int argc, char *argv[]) {
-  auto file_path = std::string(argv[1]);
-  auto ctx = ir_generator::Context("example-module");
+  tokenizer tt;
 
-  return ir_generator::generate_example_code(ctx) ||
-    ir_generator::print_module(file_path, ctx) ||
-    ir_compiler::compile(file_path);
+#ifdef TEST_TOKENIZER
+  tt.scan();
+
+  while(tt.lookahead.size() && tt.lookahead.front().type != tkn_EOF)
+  {
+      std::cout << tt.lookahead.front() << std::endl;
+      tt.lookahead.pop_front();
+      tt.scan();
+  }
+
+  ASSERT(tt.lookahead.size());
+  std::cout << tt.lookahead.front() << std::endl;
+#endif
+
+  return 0;
 }
