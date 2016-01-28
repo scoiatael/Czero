@@ -26,4 +26,6 @@ int ir_compiler::compile(std::string ir_file_path, const Options& options) {
   if(!options.remove_ir_file)  return EXIT_SUCCESS;
 
   boost::filesystem::remove(ir_file_path);
+
+  return EXIT_SUCCESS;
 }

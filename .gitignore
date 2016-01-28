@@ -20,3 +20,4 @@ install_manifest.txt
 
 # ycmd
 .ycm_extra_conf.pyc
+compile_commands.json

@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.0)
 project (CZero)
 
+set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )
+
 set(lib ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(maphoon_root ${CMAKE_CURRENT_BINARY_DIR}/maphoon)
 set(bin ${CMAKE_CURRENT_SOURCE_DIR}/bin)
