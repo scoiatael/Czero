@@ -6,6 +6,9 @@
 #include <cassert>
 #include <iostream>
 
+
 #include "parser/parser.h"
+#include "util/ir_compiler.hpp"
+#include "util/ir_generator.hpp"
 
 #endif
