@@ -14,7 +14,9 @@ set(parser_files
   parser.cpp
   parser.h
   token.cpp
-  token.h)
+  token.h
+  varstore.h
+  varstore.cpp)
 
 set(source
   czero.cpp

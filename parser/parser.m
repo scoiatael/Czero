@@ -29,6 +29,10 @@
 %token EXPRESS
 %token CALL
 
+%global memory varstore
+
+%intokenheader #include "varstore.h"
+
 %startsymbol PROG EOF
 
 // temporary that's it

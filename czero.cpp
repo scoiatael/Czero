@@ -1,5 +1,6 @@
 #include "czero.h"
 #include "assert.h"
+#include "parser/varstore.h" // damnit
 #include "parser/reader.h"
 #include "parser/tokenizer.h"
 #include "parser/parser.h"
@@ -20,6 +21,10 @@ int main(int argc, char *argv[]) {
   ASSERT(tt.lookahead.size());
   std::cout << tt.lookahead.front() << std::endl;
 #endif
+
+  varstore vs;
+  parser(tt, vs, tkn_PROG, 10);
+  ASSERT(tt.lookahead.size());
 
   return 0;
 }
