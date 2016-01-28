@@ -8,20 +8,21 @@ set(maphoon_root ${CMAKE_CURRENT_BINARY_DIR}/maphoon)
 set(bin ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(parser ${CMAKE_CURRENT_SOURCE_DIR}/parser)
 set(util ${CMAKE_CURRENT_SOURCE_DIR}/util)
+set(syntax ${CMAKE_CURRENT_SOURCE_DIR}/syntax)
 set(build ${CMAKE_CURRENT_SOURCE_DIR}/build)
 
 set(parser_files
   parser.cpp
   parser.h
   token.cpp
-  token.h
-  varstore.h
-  varstore.cpp)
+  token.h)
 
 set(source
-  czero.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/czero.cpp
+  ${syntax}/ast.cpp
   ${util}/ir_compiler.cpp
   ${util}/ir_generator.cpp
+  ${parser}/varstore.cpp
   ${parser}/tokenizer.cpp)
 
 set(maphoon_files "")
@@ -55,7 +56,7 @@ add_custom_command(
   OUTPUT ${maphoon_files}
   COMMAND ./maphoon ${parser}/parser.m
   DEPENDS Maphoon
-  DEPENDS ${parser}/parser.m
+  DEPENDS ${parser}/parser.m ${parser}/varstore.h
   WORKING_DIRECTORY ${maphoon_root}/bin)
 
 foreach(index 0 1 2 3)
