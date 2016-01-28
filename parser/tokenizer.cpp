@@ -52,18 +52,7 @@ void tokenizer::scan( )
 
    if( r. lookahead == ':' )
    {
-      r. moveforward( );
-      if( r. lookahead == '=' )
-      {
-         r. moveforward( );
-
-         lookahead. push_back( tkn_BECOMES );
-         return;
-      }
-
-      // A single : is not a token.
-
-      lookahead. push_back( tkn_SCANERROR );
+      lookahead. push_back( tkn_COLON );
       return;
    }
 
@@ -78,19 +67,64 @@ void tokenizer::scan( )
 
    if( isletter( r. lookahead ) || r. lookahead == '_' )
    {
-      lookahead. push_back( tkn_IDENTIFIER );
-      lookahead. back( ). id. push_back( std::string( ));
+      std::string name;
+      name.push_back(r.lookahead);
+
+      //lookahead. push_back( tkn_IDENTIFIER );
+      //lookahead. back( ). id. push_back( std::string( ));
          // This appends an empty string to id, so that
          // we have a string attribute now.
 
-      lookahead. back( ). id. back( ) += r. lookahead;
+      //lookahead. back( ). id. back( ) += r. lookahead;
       r. moveforward( );
 
       while( isletter( r. lookahead ) || isdigit( r. lookahead ) ||
              r. lookahead == '_' )
       {
-         lookahead. back( ). id. back( ) += r. lookahead;
-         r. moveforward( );
+         name.push_back(r.lookahead);
+         //lookahead. back( ). id. back( ) += r. lookahead;
+         r.moveforward();
+      }
+
+      // #cant_into_macros
+      if(name == "and")
+         lookahead.push_back(tkn_AND);
+      else if(name == "or")
+         lookahead.push_back(tkn_OR);
+      else if(name == "xor")
+         lookahead.push_back(tkn_XOR);
+      else if(name == "bool")
+         lookahead.push_back(tkn_BOOL);
+      else if(name == "int")
+         lookahead.push_back(tkn_INT);
+      else if(name == "float")
+         lookahead.push_back(tkn_FLOAT);
+      else if(name == "string")
+         lookahead.push_back(tkn_STRING);
+      else if(name == "ref")
+         lookahead.push_back(tkn_REF);
+      else if(name == "struct")
+         lookahead.push_back(tkn_STRUCT);
+      else if(name == "fun")
+         lookahead.push_back(tkn_FUN);
+      else if(name == "proc")
+         lookahead.push_back(tkn_PROC);
+      else if(name == "if")
+         lookahead.push_back(tkn_IF);
+      else if(name == "then")
+         lookahead.push_back(tkn_THEN);
+      else if(name == "else")
+         lookahead.push_back(tkn_ELSE);
+      else if(name == "for")
+         lookahead.push_back(tkn_FOR);
+      else if(name == "in")
+         lookahead.push_back(tkn_IN);
+      else if(name == "while")
+         lookahead.push_back(tkn_WHILE);
+      else
+      {
+         lookahead.back().id.push_back(name);
+         lookahead.push_back(tkn_IDENTIFIER);
       }
 
       return;
@@ -233,10 +267,49 @@ void tokenizer::scan( )
       return;
    }
 
+   if( r. lookahead == '<' )
+   {
+      r. moveforward( );
+      if ( r. lookahead == '=' )
+      {
+          r. moveforward( );
+          lookahead. push_back( tkn_LESSEQ );
+          return;
+      }
+      lookahead. push_back( tkn_LESS );
+      return;
+   }
+
+   if( r. lookahead == '>' )
+   {
+      r. moveforward( );
+      if ( r. lookahead == '=' )
+      {
+          r. moveforward( );
+          lookahead. push_back( tkn_GREATEREQ );
+          return;
+      }
+      lookahead. push_back( tkn_GREATER );
+      return;
+   }
+
+   if ( r. lookahead == '=' )
+   {
+      r. moveforward( );
+      lookahead. push_back( tkn_EQ );
+      return;
+   }
+
    if( r. lookahead == '!' )
    {
-      lookahead. push_back( tkn_FACTORIAL );
       r. moveforward( );
+      if ( r. lookahead == '=' )
+      {
+          r. moveforward( );
+          lookahead. push_back( tkn_NOTEQ );
+          return;
+      }
+      lookahead. push_back( tkn_SCANERROR );
       return;
    }
 
@@ -254,6 +327,32 @@ void tokenizer::scan( )
       return;
    }
 
+   if( r. lookahead == '[' )
+   {
+      lookahead. push_back( tkn_LSQPAR );
+      r. moveforward( );
+      return;
+   }
+
+   if( r. lookahead == ']' )
+   {
+      lookahead. push_back( tkn_RSQPAR );
+      r. moveforward( );
+      return;
+   }
+   if( r. lookahead == '{' )
+   {
+      lookahead. push_back( tkn_LCURLY );
+      r. moveforward( );
+      return;
+   }
+
+   if( r. lookahead == '}' )
+   {
+      lookahead. push_back( tkn_RCURLY );
+      r. moveforward( );
+      return;
+   }
 
    // If we could not recognize anything, then we produce
    // a scan error.
