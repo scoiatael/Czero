@@ -14,20 +14,25 @@ namespace ast {
     namespace abstract {
       struct Value {
         virtual ~Value() {}
+        virtual operator int() = 0;
       };
     };
 
     struct BoolValue : public abstract::Value {
       bool value;
+      operator int() { return Bool; }
     };
     struct FloatValue : public abstract::Value {
       float value;
+      operator int() { return Float32; }
     };
     struct IntValue : public abstract::Value {
       int value;
-    };
+      operator int() { return Int32; }
+      };
     struct StringValue : public abstract::Value {
       std::string value;
+      operator int() { return String; }
     };
   };
 
