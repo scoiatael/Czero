@@ -73,6 +73,7 @@ namespace ast {
   struct Extern : public abstract::Declaration {
     types::Type return_value;
     std::vector<Variable> arguments;
+    bool variadic;
     operator int() { return ExternNode; }
   };
 
