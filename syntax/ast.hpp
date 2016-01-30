@@ -21,7 +21,7 @@ namespace ast {
     class FloatValue : public abstract::Value {
       float value;
     };
-    class IntBalue : public abstract::Value {
+    class IntValue : public abstract::Value {
       int value;
     };
   };
