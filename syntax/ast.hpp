@@ -12,19 +12,21 @@ namespace ast {
     enum Type { Poison, Int32, Float32, Bool, String };
 
     namespace abstract {
-      class Value {};
+      struct Value {
+        virtual ~Value() = 0;
+      };
     };
 
-    class BoolValue : public abstract::Value {
+    struct BoolValue : public abstract::Value {
       bool value;
     };
-    class FloatValue : public abstract::Value {
+    struct FloatValue : public abstract::Value {
       float value;
     };
-    class IntValue : public abstract::Value {
+    struct IntValue : public abstract::Value {
       int value;
     };
-    class StringValue : public abstract::Value {
+    struct StringValue : public abstract::Value {
       std::string value;
     };
   };
@@ -46,18 +48,24 @@ namespace ast {
   };
 
   namespace abstract {
-    class Node {
+    struct Node {
+      virtual ~Node() = 0;
       // Id for this node
       int id { generate_new_id() };
       // Return RealNodeType for this node
       virtual operator int() = 0;
     };
 
-    class Statement : public Node {};
+    struct Statement : public Node {
+      virtual ~Statement() = 0;
+    };
 
-    class Declaration : public Node {};
+    struct Declaration : public Node {
+      virtual ~Declaration() = 0;
+    };
 
-    class Operation : public Node {
+    struct Operation : public Node {
+      virtual ~Operation() = 0;
       types::Type type;
     };
   }
