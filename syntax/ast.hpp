@@ -41,7 +41,8 @@ namespace ast {
     ReturnNode,
     BranchNode,
     AssignmentNode,
-    WhileNode
+    WhileNode,
+    VoidContextNode
   };
 
   namespace abstract {
@@ -135,6 +136,11 @@ namespace ast {
     std::shared_ptr<abstract::Operation> condition;
     Body body;
     operator int() { return WhileNode; }
+  };
+
+  struct VoidContext : public abstract::Statement {
+    std::shared_ptr<abstract::Operation> operation;
+    operator int() { return VoidContextNode; }
   };
 
   struct Program {
