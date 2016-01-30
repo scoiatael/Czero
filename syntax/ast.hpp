@@ -60,7 +60,7 @@ namespace ast {
 
   typedef std::string Identifier;
 
-  typedef std::vector<std::unique_ptr<abstract::Statement>> Body;
+  typedef std::vector<std::shared_ptr<abstract::Statement>> Body;
 
   struct Variable : public abstract::Operation {
     Identifier identifier;
@@ -86,36 +86,36 @@ namespace ast {
 
   struct Cast : public abstract::Operation {
     types::Type to;
-    std::unique_ptr<abstract::Operation> value;
+    std::shared_ptr<abstract::Operation> value;
     operator int() { return CastNode; }
   };
 
   struct UnOp : public abstract::Operation {
     Identifier operator_;
-    std::unique_ptr<abstract::Operation> Body;
+    std::shared_ptr<abstract::Operation> Body;
     operator int() { return UnOpNode; }
   };
 
   struct BinOp : public abstract::Operation {
     Identifier operator_;
-    std::unique_ptr<abstract::Operation> left;
-    std::unique_ptr<abstract::Operation> right;
+    std::shared_ptr<abstract::Operation> left;
+    std::shared_ptr<abstract::Operation> right;
     operator int() { return BinOpNode; }
   };
 
   struct Call : public abstract::Operation {
     Identifier function_name;
-    std::vector<std::unique_ptr<abstract::Operation>> arguments;
+    std::vector<std::shared_ptr<abstract::Operation>> arguments;
     operator int() { return CallNode; }
   };
 
   struct Return : public abstract::Statement {
-    std::unique_ptr<abstract::Operation> value;
+    std::shared_ptr<abstract::Operation> value;
     operator int() { return ReturnNode; }
   };
 
   struct Branch : public abstract::Statement {
-    std::unique_ptr<abstract::Operation> condition;
+    std::shared_ptr<abstract::Operation> condition;
     Body then_;
     Body else_;
     operator int() { return BranchNode; }
@@ -123,18 +123,18 @@ namespace ast {
 
   struct Assignment : public abstract::Statement {
     Identifier identifier;
-    std::unique_ptr<abstract::Operation> value;
+    std::shared_ptr<abstract::Operation> value;
     operator int() { return AssignmentNode; }
   };
 
   struct While : public abstract::Statement {
-    std::unique_ptr<abstract::Operation> condition;
+    std::shared_ptr<abstract::Operation> condition;
     Body body;
     operator int() { return WhileNode; }
   };
 
   struct Program {
-    std::vector<std::unique_ptr<abstract::Declaration>> body;
+    std::vector<std::shared_ptr<abstract::Declaration>> body;
   };
 }
 
