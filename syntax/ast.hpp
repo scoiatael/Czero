@@ -9,7 +9,7 @@ namespace ast {
   int generate_new_id();
 
   namespace types {
-    enum Type { Int32, Float32, Bool };
+    enum Type { Int32, Float32, Bool, String };
 
     namespace abstract {
       class Value {};
@@ -23,6 +23,9 @@ namespace ast {
     };
     class IntValue : public abstract::Value {
       int value;
+    };
+    class StringValue : public abstract::Value {
+      std::string value;
     };
   };
 
