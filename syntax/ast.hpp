@@ -85,7 +85,7 @@ namespace ast {
   };
 
   struct Constant : public abstract::Operation {
-    types::abstract::Value value;
+    std::shared_ptr<types::abstract::Value> value;
     operator int() { return ConstantNode; }
   };
 
