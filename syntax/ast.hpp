@@ -72,6 +72,7 @@ namespace ast {
   };
 
   struct Extern : public abstract::Declaration {
+    Identifier identifier;
     types::Type return_value;
     std::vector<Variable> arguments;
     bool variadic;
