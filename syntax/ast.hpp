@@ -13,7 +13,7 @@ namespace ast {
 
     namespace abstract {
       struct Value {
-        virtual ~Value() = 0;
+        virtual ~Value() {}
       };
     };
 
@@ -49,7 +49,7 @@ namespace ast {
 
   namespace abstract {
     struct Node {
-      virtual ~Node() = 0;
+      virtual ~Node() {}
       // Id for this node
       int id { generate_new_id() };
       // Return RealNodeType for this node
@@ -57,15 +57,15 @@ namespace ast {
     };
 
     struct Statement : public Node {
-      virtual ~Statement() = 0;
+      virtual ~Statement() {}
     };
 
     struct Declaration : public Node {
-      virtual ~Declaration() = 0;
+      virtual ~Declaration() {}
     };
 
     struct Operation : public Node {
-      virtual ~Operation() = 0;
+      virtual ~Operation() {}
       types::Type type;
     };
   }
