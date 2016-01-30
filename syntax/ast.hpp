@@ -80,7 +80,6 @@ namespace ast {
 
   struct Func : public Extern {
     Body body;
-    std::vector<Variable> variables;
     operator int() { return FuncNode; }
   };
 
