@@ -150,6 +150,12 @@ class Compiler {
     return extrnf;
   }
 
+  int allocate_variable(ast::Variable& it) {
+    auto alloc_inst = this->ctx.Builder.CreateAlloca(llvm_type_for(it.type));
+    variables.insert(std::pair<llvm::StringRef, llvm::Value*>(it.identifier,
+                                                              alloc_inst));
+  }
+
   int compile_func(ast::Func* func) {
     assert(func != nullptr);
     auto decl = compile_extern(dynamic_cast<ast::Extern*>(func));
@@ -159,15 +165,11 @@ class Compiler {
 
     // Allocate memory on stack for function argument variables
     for (auto it = func->arguments.begin(); it != func->arguments.end(); ++it) {
-      auto alloc_inst = this->ctx.Builder.CreateAlloca(llvm_type_for(it->type));
-      variables.insert(std::pair<llvm::StringRef, llvm::Value*>(it->identifier,
-                                                                alloc_inst));
+      allocate_variable(*it);
     }
     // Allocate memory on stack for local variables
     for (auto it = func->local_variables.begin(); it != func->local_variables.end(); ++it) {
-      auto alloc_inst = this->ctx.Builder.CreateAlloca(llvm_type_for(it->type));
-      variables.insert(std::pair<llvm::StringRef, llvm::Value*>(it->identifier,
-                                                                alloc_inst));
+      allocate_variable(*it);
     }
     compile_body(func->body);
 
