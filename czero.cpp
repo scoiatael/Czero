@@ -22,8 +22,11 @@ int main(int argc, char *argv[]) {
   main->return_value = ast::types::Int32;
 
   // Create variable holding value "Hello world!"
-  main->body.push_back(std::make_shared<ast::Assignment>());
   std::string hello_world_variable("hello_world_str");
+  main->local_variables.push_back(ast::Variable());
+  main->local_variables[0].type = ast::types::String;
+  main->local_variables[0].identifier = hello_world_variable;
+  main->body.push_back(std::make_shared<ast::Assignment>());
   auto hello_world_var_assignment = dynamic_cast<ast::Assignment*>(main->body[0].get());
   hello_world_var_assignment->identifier = hello_world_variable;
   hello_world_var_assignment->value = std::make_shared<ast::Constant>();
@@ -48,10 +51,14 @@ int main(int argc, char *argv[]) {
 
   // Return 0 for good measure
   main->body.push_back(std::make_shared<ast::Return>());
-  auto main_return = dynamic_cast<ast::Return*>(main->body[0].get());
+  auto main_return = dynamic_cast<ast::Return*>(main->body[2].get());
   main_return->value = std::make_shared<ast::Constant>();
   auto main_return_value = dynamic_cast<ast::Constant*>(main_return->value.get());
   main_return_value->type = ast::types::Int32;
-  main_return_value->value = 0;
+  main_return_value->value = std::make_shared<ast::types::IntValue>();
+  auto main_return_value_value = dynamic_cast<ast::types::IntValue*>(main_return_value->value.get());
+  main_return_value_value->value = 0;
+
+  pretty_print::program(&program);
   return 0;
 }

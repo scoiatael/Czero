@@ -36,7 +36,7 @@ foreach(file ${parser_files})
   list(APPEND final_parser_files ${parser}/${file})
 endforeach(file)
 
-find_package( Boost 1.40 COMPONENTS program_options filesystem system REQUIRED )
+find_package( Boost 1.40 COMPONENTS program_options filesystem system regex REQUIRED )
 include_directories( ${Boost_INCLUDE_DIR} )
 
 

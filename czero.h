@@ -11,5 +11,6 @@
 #include "util/ir_compiler.hpp"
 #include "util/ir_generator.hpp"
 #include "syntax/ast.hpp"
+#include "syntax/pretty_print.hpp"
 
 #endif
