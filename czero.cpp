@@ -14,25 +14,10 @@ int main(int argc, char *argv[]) {
   program.body.push_back(printf);
 
   // Create main prototype
-  auto hello_var = ast::Variable("hello_var", ast::types::String);
   auto main = std::make_shared<ast::Func>();
   main->identifier = "main";
   main->return_value = ast::types::Int32;
   program.body.push_back(main);
-
-  // Create variable holding value "Hello world!"
-  main->local_variables.push_back(hello_var);
-  auto hello_world_var_assignment = std::make_shared<ast::Assignment>();
-  main->body.push_back(hello_world_var_assignment);
-  hello_world_var_assignment->identifier = hello_var.identifier;
-  hello_world_var_assignment->value = std::make_shared<ast::Constant>();
-  auto hello_world_constant =
-    dynamic_cast<ast::Constant*>(hello_world_var_assignment->value.get());
-  hello_world_constant->type = ast::types::String;
-  hello_world_constant->value = std::make_shared<ast::types::StringValue>();
-  auto hello_world_constant_value =
-    dynamic_cast<ast::types::StringValue*>(hello_world_constant->value.get());
-  hello_world_constant_value->value = "Hello world!\n";
 
   // Call printf(hello_world)
   auto printf_context = std::make_shared<ast::VoidContext>();
@@ -40,13 +25,14 @@ int main(int argc, char *argv[]) {
   printf_context->operation = std::make_shared<ast::Call>();
   auto printf_call = dynamic_cast<ast::Call*>(printf_context->operation.get());
   printf_call->function_name = printf_function;
-  auto get_hello_world_value = std::make_shared<ast::Variable>();
-  printf_call->arguments.push_back(get_hello_world_value);
-  get_hello_world_value->type = ast::types::String;
-  get_hello_world_value->identifier = hello_var.identifier;
+  auto hello_world_constant = std::make_shared<ast::Constant>();
+  printf_call->arguments.push_back(hello_world_constant);
+  hello_world_constant->type = ast::types::String;
+  auto hello_world_constant_value = std::make_shared<ast::types::StringValue>();
+  hello_world_constant->value = hello_world_constant_value;
+  hello_world_constant_value->value = "Hello world!\n";
 
-  // Return 0 for good measure
-  auto main_return = std::make_shared<ast::Return>();
+          auto main_return = std::make_shared<ast::Return>();
   main->body.push_back(main_return);
   main_return->value = std::make_shared<ast::Constant>();
   auto main_return_value = dynamic_cast<ast::Constant*>(main_return->value.get());
@@ -56,5 +42,12 @@ int main(int argc, char *argv[]) {
   main_return_value_value->value = 0;
 
   std::cout << program;
+  auto ir = ir_generator::Context("czero_main");
+  compiler::program(&program, ir);
+  if(argc > 1) {
+    std::string file_path(argv[1]);
+    ir_generator::print_module(file_path, ir);
+    ir_compiler::compile(file_path);
+  }
   return 0;
 }
