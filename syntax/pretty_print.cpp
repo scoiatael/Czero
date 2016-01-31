@@ -41,9 +41,7 @@ class PrettyPrinter {
     this->indent -= 2;
     print_indent();
     std::cout << "}\n";
-    for (auto it = func->body.begin(); it != func->body.end(); ++it) {
-      node(it->get());
-    }
+    print_body(func->body);
     std::cout << "}\n";
     this->indent = 0;
     return EXIT_SUCCESS;
@@ -149,6 +147,7 @@ class PrettyPrinter {
     for (auto it = body.begin(); it != body.end(); ++it) {
       node(it->get());
     }
+    return EXIT_SUCCESS;
   }
 
   int print_while(ast::While* whil) {
