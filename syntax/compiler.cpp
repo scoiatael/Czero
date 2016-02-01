@@ -4,6 +4,7 @@ class Compiler {
   ir_generator::Context& ctx;
   llvm::StringMap<llvm::Function*> functions;
   llvm::StringMap<llvm::Value*> variables;
+  llvm::Function* current_function;
 
   llvm::Type* llvm_type_for(ast::types::Type type) {
     switch(type) {
@@ -22,7 +23,8 @@ class Compiler {
   }
 
   llvm::Value* compile_bool(ast::types::BoolValue* value) {
-    return this->ctx.Builder.getInt1(value->value);
+    // Because 0 is True in LLVM, and False in C++ (or the other way around..)
+    return this->ctx.Builder.getInt1(!value->value);
   }
 
   llvm::Value* compile_float(ast::types::FloatValue* value) {
@@ -97,6 +99,7 @@ class Compiler {
   }
 
   int compile_branch(ast::Branch* statement) {
+    assert(statement != nullptr);
     return EXIT_SUCCESS;
   }
 
@@ -110,7 +113,25 @@ class Compiler {
     return EXIT_SUCCESS;
   }
 
-  int compile_while(ast::While* statement) {
+  int compile_while(ast::While* whil) {
+    assert(whil != nullptr);
+    assert(this->current_function != nullptr);
+    auto condition_block = llvm::BasicBlock::Create(this->ctx.llvmContext,
+                                                    "condition",
+                                                    this->current_function);
+    auto body_block = llvm::BasicBlock::Create(this->ctx.llvmContext,
+                                               "body",
+                                               this->current_function);
+    auto exit_block = llvm::BasicBlock::Create(this->ctx.llvmContext,
+                                               "exit",
+                                               this->current_function);
+    this->ctx.Builder.SetInsertPoint(condition_block);
+    auto jump_condition = operation(whil->condition.get());
+    this->ctx.Builder.CreateCondBr(jump_condition, body_block, exit_block);
+    this->ctx.Builder.SetInsertPoint(body_block);
+    compile_body(whil->body);
+    this->ctx.Builder.CreateBr(condition_block);
+    this->ctx.Builder.SetInsertPoint(exit_block);
     return EXIT_SUCCESS;
   }
 
@@ -154,6 +175,7 @@ class Compiler {
     auto alloc_inst = this->ctx.Builder.CreateAlloca(llvm_type_for(it.type));
     variables.insert(std::pair<llvm::StringRef, llvm::Value*>(it.identifier,
                                                               alloc_inst));
+    return EXIT_SUCCESS;
   }
 
   int compile_func(ast::Func* func) {
@@ -171,6 +193,8 @@ class Compiler {
     for (auto it = func->local_variables.begin(); it != func->local_variables.end(); ++it) {
       allocate_variable(*it);
     }
+    // TODO: store argument values in memory
+    this->current_function = decl;
     compile_body(func->body);
 
     variables.clear();

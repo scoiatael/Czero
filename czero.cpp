@@ -32,7 +32,21 @@ int main(int argc, char *argv[]) {
   hello_world_constant->value = hello_world_constant_value;
   hello_world_constant_value->value = "Hello world!\n";
 
-          auto main_return = std::make_shared<ast::Return>();
+  // while(true) { printf("Hello world\n") }
+  auto whil = std::make_shared<ast::While>();
+  main->body.push_back(whil);
+  whil->condition = std::make_shared<ast::Constant>();
+  auto while_cond_const =
+    dynamic_cast<ast::Constant*>(whil->condition.get());
+  while_cond_const->type = ast::types::Bool;
+  while_cond_const->value = std::make_shared<ast::types::BoolValue>();
+  auto whil_cond_cons_value =
+    dynamic_cast<ast::types::BoolValue*>(while_cond_const->value.get());
+  hello_world_constant_value->value = true;
+  whil->body.push_back(std::make_shared<ast::VoidContext>(*printf_context));
+
+  // Return 0 for good measure
+  auto main_return = std::make_shared<ast::Return>();
   main->body.push_back(main_return);
   main_return->value = std::make_shared<ast::Constant>();
   auto main_return_value = dynamic_cast<ast::Constant*>(main_return->value.get());
