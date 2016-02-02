@@ -8,9 +8,12 @@
 
 
 #include "parser/parser.h"
-#include "util/ir_compiler.hpp"
-#include "util/ir_generator.hpp"
+#include "parser/varstore.h"
+#include "parser/reader.h"
+#include "parser/tokenizer.h"
 #include "syntax/ast.hpp"
 #include "syntax/pretty_print.hpp"
+#include "util/ir_compiler.hpp"
+#include "util/ir_generator.hpp"
 
 #endif

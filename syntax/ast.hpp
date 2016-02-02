@@ -1,7 +1,7 @@
 #ifndef AST_INCLUDED
 #define AST_INCLUDED 1
 
-#include <vector>
+#include <list>
 #include <string>
 #include <memory>
 
@@ -14,26 +14,26 @@ namespace ast {
     namespace abstract {
       struct Value {
         virtual ~Value() {}
-        virtual Type type() = 0;
-        operator int() { return this->type(); }
+        virtual Type type() const = 0;
+        operator int() const { return this->type(); }
       };
     };
 
     struct BoolValue : public abstract::Value {
       bool value;
-      Type type() { return Bool; }
+      Type type() const { return Bool; }
     };
     struct FloatValue : public abstract::Value {
       float value;
-      Type type() { return Float32; }
+      Type type() const { return Float32; }
     };
     struct IntValue : public abstract::Value {
       int value;
-      Type type() { return Int32; }
+      Type type() const { return Int32; }
       };
     struct StringValue : public abstract::Value {
       std::string value;
-      Type type() { return String; }
+      Type type() const { return String; }
     };
   };
 
@@ -58,8 +58,8 @@ namespace ast {
       virtual ~Node() {}
       // Id for this node
       int id { generate_new_id() };
-      virtual RealNodeType node_type() = 0;
-      operator int() { return this->node_type(); }
+      virtual RealNodeType node_type() const = 0;
+      operator int() const { return this->node_type(); }
     };
 
     struct Statement : public Node {
@@ -78,88 +78,88 @@ namespace ast {
 
   typedef std::string Identifier;
 
-  typedef std::vector<std::shared_ptr<abstract::Statement>> Body;
+  typedef std::list<std::shared_ptr<abstract::Statement>> Body;
 
   struct Variable : public abstract::Operation {
     Identifier identifier;
-    RealNodeType node_type() { return VariableNode; }
+    RealNodeType node_type() const { return VariableNode; }
   };
 
   struct Extern : public abstract::Declaration {
     Identifier identifier;
     types::Type return_value;
-    std::vector<Variable> arguments;
+    std::list<Variable> arguments;
     bool variadic;
-    RealNodeType node_type() { return ExternNode; }
+    RealNodeType node_type() const { return ExternNode; }
   };
 
   struct Func : public Extern {
     Body body;
-    std::vector<Variable> local_variables;
-    RealNodeType node_type() { return FuncNode; }
+    std::list<Variable> local_variables;
+    RealNodeType node_type() const { return FuncNode; }
   };
 
   struct Constant : public abstract::Operation {
     std::shared_ptr<types::abstract::Value> value;
-    RealNodeType node_type() { return ConstantNode; }
+    RealNodeType node_type() const { return ConstantNode; }
   };
 
   struct Cast : public abstract::Operation {
     types::Type to;
     std::shared_ptr<abstract::Operation> value;
-    RealNodeType node_type() { return CastNode; }
+    RealNodeType node_type() const { return CastNode; }
   };
 
   struct UnOp : public abstract::Operation {
     Identifier operator_;
     std::shared_ptr<abstract::Operation> value;
-    RealNodeType node_type() { return UnOpNode; }
+    RealNodeType node_type() const { return UnOpNode; }
   };
 
   struct BinOp : public abstract::Operation {
     Identifier operator_;
     std::shared_ptr<abstract::Operation> left;
     std::shared_ptr<abstract::Operation> right;
-    RealNodeType node_type() { return BinOpNode; }
+    RealNodeType node_type() const { return BinOpNode; }
   };
 
   struct Call : public abstract::Operation {
     Identifier function_name;
-    std::vector<std::shared_ptr<abstract::Operation>> arguments;
-    RealNodeType node_type() { return CallNode; }
+    std::list<std::shared_ptr<abstract::Operation>> arguments;
+    RealNodeType node_type() const { return CallNode; }
   };
 
   struct Return : public abstract::Statement {
     std::shared_ptr<abstract::Operation> value;
-    RealNodeType node_type() { return ReturnNode; }
+    RealNodeType node_type() const { return ReturnNode; }
   };
 
   struct Branch : public abstract::Statement {
     std::shared_ptr<abstract::Operation> condition;
     Body then_;
     Body else_;
-    RealNodeType node_type() { return BranchNode; }
+    RealNodeType node_type() const { return BranchNode; }
   };
 
   struct Assignment : public abstract::Statement {
     Identifier identifier;
     std::shared_ptr<abstract::Operation> value;
-    RealNodeType node_type() { return AssignmentNode; }
+    RealNodeType node_type() const { return AssignmentNode; }
   };
 
   struct While : public abstract::Statement {
     std::shared_ptr<abstract::Operation> condition;
     Body body;
-    RealNodeType node_type() { return WhileNode; }
+    RealNodeType node_type() const { return WhileNode; }
   };
 
   struct VoidContext : public abstract::Statement {
     std::shared_ptr<abstract::Operation> operation;
-    RealNodeType node_type() { return VoidContextNode; }
+    RealNodeType node_type() const { return VoidContextNode; }
   };
 
   struct Program {
-    std::vector<std::shared_ptr<abstract::Declaration>> body;
+    std::list<std::shared_ptr<abstract::Declaration>> body;
   };
 }
 

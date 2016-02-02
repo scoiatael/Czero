@@ -1,10 +1,23 @@
 #include "../assert.h"
+#include "../syntax/ast.hpp"
+#include "../syntax/pretty_print.hpp"
 
 
-%attribute id            std::string
-%attribute reason        std::string
-%attribute intval        int
-%attribute floatval      float
+%attribute id        std::string
+%constraint IDENTIFIER id 1 2
+%constraint OP         id 1 2
+
+%attribute reason    std::string
+
+%attribute intV      int
+
+%attribute floatV    float
+
+%attribute callP     ast::Call
+%constraint CALL callP 1 2
+
+%attribute expressP  std::shared_ptr<ast::abstract::Operation>
+%constraint EXPRESS expressP 0
 
 %token EOF SCANERROR
 %token SEMICOLON COLON COMMA
@@ -28,14 +41,21 @@
 %token ARGS
 %token EXPRESS
 %token CALL
+%token OP
+
+
+
+//%constraint CALL callParam 1 2
 
 %global memory varstore
 
 %intokenheader #include "varstore.h"
+%intokenheader #include "../syntax/ast.hpp"
+%intokenheader #include "../syntax/pretty_print.hpp"
 
-%startsymbol PROG EOF
+%startsymbol OP EOF
 
-// temporary that's it
+// temporarily that's it
 % TYPE : BOOL 
 %      | INT 
 %      | FLOAT 
@@ -56,6 +76,7 @@
 %       |
 %       ;
 
+// XXX - wrong
 % ARGS : TYPE IDENTIFIER COMMA ARGS
 %     |
 %     ;
@@ -73,6 +94,7 @@
 %      ;
 
 % EXPR : IDENTIFIER
+    
 %      | CALL
 // fill missing
 %      | EXPR OP EXPR
@@ -80,25 +102,71 @@
 %      | IF EXPR THEN EXPR ELSE EXPR
 %      ;
 
+// this is also wrong
 % EXPRESS : EXPR COLON EXPRESS
 %         |
 %         ;
 
 % OP : PLUS
+    token op = tkn_OP;
+    op.id.push_back("+");
+    return op;
 %    | MINUS
+    token op = tkn_OP;
+    op.id.push_back("-");
+    return op;
 %    | TIMES
+    token op = tkn_OP;
+    op.id.push_back("*");
+    return op;
 %    | DIVIDES
+    token op = tkn_OP;
+    op.id.push_back("/");
+    return op;
 %    | AND
+    token op = tkn_OP;
+    op.id.push_back("and");
+    return op;
 %    | OR
+    token op = tkn_OP;
+    op.id.push_back("or");
+    return op;
 %    | XOR
+    token op = tkn_OP;
+    op.id.push_back("xor");
+    return op;
 %    | LESS
+    token op = tkn_OP;
+    op.id.push_back("<");
+    return op;
 %    | LESSEQ
+    token op = tkn_OP;
+    op.id.push_back("<=");
+    return op;
 %    | GREATER
+    token op = tkn_OP;
+    op.id.push_back(">");
+    return op;
 %    | GREATEREQ
+    token op = tkn_OP;
+    op.id.push_back(">=");
+    return op;
 %    | EQ
+    token op = tkn_OP;
+    op.id.push_back("=");
+    return op;
 %    | NOTEQ
+    token op = tkn_OP;
+    op.id.push_back("!=");
+    return op;
 %    ;
 
-% CALL : IDENTIFIER LPAR EXPR RPAR
+% CALL : IDENTIFIER LPAR EXPRESS RPAR
+    token call = tkn_CALL;
+    ast::Call c;
+    c.function_name = IDENTIFIER1->id.front();
+    c.arguments = EXPRESS3->expressP;
+    call.callP.push_back(c);
+    return call;
 %      ;
 
