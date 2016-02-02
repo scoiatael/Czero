@@ -240,12 +240,12 @@ void tokenizer::scan( )
      if(isfloat)
      {
          lookahead.push_back(tkn_FLOAT);
-         lookahead.back().floatval.push_back(val);
+         lookahead.back().floatV.push_back(val);
      }
      else
      {
          lookahead.push_back(tkn_INT);
-         lookahead.back().intval.push_back((int)val);
+         lookahead.back().intV.push_back((int)val);
      }
      return;
    }

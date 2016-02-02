@@ -3,11 +3,21 @@
 #include "../syntax/pretty_print.hpp"
 
 
-%attribute id            std::string
-%attribute reason        std::string
-%attribute intval        int
-%attribute floatval      float
-%attribute callParam     ast::Call
+%attribute id        std::string
+%constraint IDENTIFIER id 1 2
+%constraint OP         id 1 2
+
+%attribute reason    std::string
+
+%attribute intV      int
+
+%attribute floatV    float
+
+%attribute callP     ast::Call
+%constraint CALL callP 1 2
+
+%attribute expressP  std::shared_ptr<ast::abstract::Operation>
+%constraint EXPRESS expressP 0
 
 %token EOF SCANERROR
 %token SEMICOLON COLON COMMA
@@ -33,9 +43,7 @@
 %token CALL
 %token OP
 
-%constraint IDENTIFIER id 1 2
 
-%constraint OP id 1 2
 
 //%constraint CALL callParam 1 2
 
@@ -94,6 +102,7 @@
 %      | IF EXPR THEN EXPR ELSE EXPR
 %      ;
 
+// this is also wrong
 % EXPRESS : EXPR COLON EXPRESS
 %         |
 %         ;
@@ -152,10 +161,12 @@
     return op;
 %    ;
 
-% CALL : IDENTIFIER LPAR EXPR RPAR
-    //token call = tkn_CALL;
-    //ast::Call c;
-    //call.callParam.push_back(c);
-    //return call;
+% CALL : IDENTIFIER LPAR EXPRESS RPAR
+    token call = tkn_CALL;
+    ast::Call c;
+    c.function_name = IDENTIFIER1->id.front();
+    c.arguments = EXPRESS3->expressP;
+    call.callP.push_back(c);
+    return call;
 %      ;
 

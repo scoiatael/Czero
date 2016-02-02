@@ -16,7 +16,7 @@ class PrettyPrinter {
     for (auto it = extrn.arguments.begin(); it != extrn.arguments.end(); ++it) {
       stream << it->identifier << " : ";
       type(stream, it->type);
-      if((it + 1) != extrn.arguments.end()) {
+      if((std::next(it)) != extrn.arguments.end()) {
         stream << ", ";
       }
     }
@@ -97,7 +97,7 @@ class PrettyPrinter {
     stream << call.function_name << "(";
     for (auto it = call.arguments.begin(); it != call.arguments.end(); ++it) {
       node(stream, *(it->get()));
-      if((it + 1) != call.arguments.end()) {
+      if((std::next(it)) != call.arguments.end()) {
         stream << ", ";
       }
     }

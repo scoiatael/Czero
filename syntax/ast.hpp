@@ -1,7 +1,7 @@
 #ifndef AST_INCLUDED
 #define AST_INCLUDED 1
 
-#include <vector>
+#include <list>
 #include <string>
 #include <memory>
 
@@ -78,7 +78,7 @@ namespace ast {
 
   typedef std::string Identifier;
 
-  typedef std::vector<std::shared_ptr<abstract::Statement>> Body;
+  typedef std::list<std::shared_ptr<abstract::Statement>> Body;
 
   struct Variable : public abstract::Operation {
     Identifier identifier;
@@ -88,14 +88,14 @@ namespace ast {
   struct Extern : public abstract::Declaration {
     Identifier identifier;
     types::Type return_value;
-    std::vector<Variable> arguments;
+    std::list<Variable> arguments;
     bool variadic;
     RealNodeType node_type() const { return ExternNode; }
   };
 
   struct Func : public Extern {
     Body body;
-    std::vector<Variable> local_variables;
+    std::list<Variable> local_variables;
     RealNodeType node_type() const { return FuncNode; }
   };
 
@@ -125,7 +125,7 @@ namespace ast {
 
   struct Call : public abstract::Operation {
     Identifier function_name;
-    std::vector<std::shared_ptr<abstract::Operation>> arguments;
+    std::list<std::shared_ptr<abstract::Operation>> arguments;
     RealNodeType node_type() const { return CallNode; }
   };
 
@@ -159,7 +159,7 @@ namespace ast {
   };
 
   struct Program {
-    std::vector<std::shared_ptr<abstract::Declaration>> body;
+    std::list<std::shared_ptr<abstract::Declaration>> body;
   };
 }
 
