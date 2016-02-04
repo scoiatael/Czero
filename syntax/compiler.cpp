@@ -98,8 +98,31 @@ class Compiler {
     return EXIT_SUCCESS;
   }
 
-  int compile_branch(ast::Branch* statement) {
-    assert(statement != nullptr);
+  int compile_branch(ast::Branch* branch) {
+    assert(branch != nullptr);
+    assert(this->current_function != nullptr);
+    auto condition_block = llvm::BasicBlock::Create(this->ctx.llvmContext,
+                                                    "condition",
+                                                    this->current_function);
+    auto then_block = llvm::BasicBlock::Create(this->ctx.llvmContext,
+                                               "then",
+                                               this->current_function);
+    auto else_block = llvm::BasicBlock::Create(this->ctx.llvmContext,
+                                               "else",
+                                               this->current_function);
+    auto exit_block = llvm::BasicBlock::Create(this->ctx.llvmContext,
+                                               "exit",
+                                               this->current_function);
+    this->ctx.Builder.SetInsertPoint(condition_block);
+    auto jump_condition = operation(branch->condition.get());
+    this->ctx.Builder.CreateCondBr(jump_condition, then_block, else_block);
+    this->ctx.Builder.SetInsertPoint(then_block);
+    compile_body(branch->then_);
+    this->ctx.Builder.CreateBr(exit_block);
+    this->ctx.Builder.SetInsertPoint(else_block);
+    compile_body(branch->else_);
+    this->ctx.Builder.CreateBr(exit_block);
+    this->ctx.Builder.SetInsertPoint(exit_block);
     return EXIT_SUCCESS;
   }
 
