@@ -73,10 +73,76 @@ class Compiler {
   }
 
   llvm::Value* compile_un_op(ast::UnOp* un_op) {
+    assert(un_op != nullptr);
+    auto value = operation(un_op->value.get());
+    switch(un_op->type) {
+    case ast::types::Int32:
+      if(un_op->operator_ == "neg") {
+        return this->ctx.Builder.CreateNeg(value);
+      }
+      break;
+    case ast::types::Float32:
+      if(un_op->operator_ == "neg") {
+        return this->ctx.Builder.CreateFNeg(value);
+      }
+      break;
+    case ast::types::Bool:
+      if(un_op->operator_ == "not") {
+        return this->ctx.Builder.CreateNot(value);
+      }
+      break;
+    default:
+      assert(false);
+    }
+    assert(false);
     return NULL;
   }
 
   llvm::Value* compile_bin_op(ast::BinOp* bin_op) {
+    assert(bin_op != nullptr);
+    auto lhs_value = operation(bin_op->left.get());
+    auto rhs_value = operation(bin_op->right.get());
+    switch(bin_op->type) {
+    case ast::types::Int32:
+      if(bin_op->operator_ == "add") {
+        return this->ctx.Builder.CreateAdd(lhs_value, rhs_value);
+      }
+      if(bin_op->operator_ == "sub") {
+        return this->ctx.Builder.CreateSub(lhs_value, rhs_value);
+      }
+      if(bin_op->operator_ == "mul") {
+        return this->ctx.Builder.CreateMul(lhs_value, rhs_value);
+      }
+      if(bin_op->operator_ == "div") {
+        return this->ctx.Builder.CreateSDiv(lhs_value, rhs_value);
+      }
+      break;
+    case ast::types::Float32:
+      if(bin_op->operator_ == "add") {
+        return this->ctx.Builder.CreateFAdd(lhs_value, rhs_value);
+      }
+      if(bin_op->operator_ == "sub") {
+        return this->ctx.Builder.CreateFSub(lhs_value, rhs_value);
+      }
+      if(bin_op->operator_ == "mul") {
+        return this->ctx.Builder.CreateFMul(lhs_value, rhs_value);
+      }
+      if(bin_op->operator_ == "div") {
+        return this->ctx.Builder.CreateFDiv(lhs_value, rhs_value);
+      }
+      break;
+    case ast::types::Bool:
+      if(bin_op->operator_ == "and") {
+        return this->ctx.Builder.CreateAnd(lhs_value, rhs_value);
+      }
+      if(bin_op->operator_ == "or") {
+        return this->ctx.Builder.CreateOr(lhs_value, rhs_value);
+      }
+      break;
+    default:
+      assert(false);
+    }
+    assert(false);
     return NULL;
   }
 
