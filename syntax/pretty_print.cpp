@@ -16,7 +16,7 @@ class PrettyPrinter {
     for (auto it = extrn.arguments.begin(); it != extrn.arguments.end(); ++it) {
       stream << it->identifier << " : ";
       type(it->type);
-      if((it + 1) != extrn.arguments.end()) {
+      if((std::next(it)) != extrn.arguments.end()) {
         stream << ", ";
       }
     }
@@ -93,8 +93,8 @@ class PrettyPrinter {
   std::ostream& print_call(const ast::Call& call) {
     stream << call.function_name << "(";
     for (auto it = call.arguments.begin(); it != call.arguments.end(); ++it) {
-      node(*(it->get()));
-      if((it + 1) != call.arguments.end()) {
+      node(**it);
+      if((std::next(it)) != call.arguments.end()) {
         stream << ", ";
       }
     }
@@ -129,14 +129,14 @@ class PrettyPrinter {
   std::ostream& print_assignment(const ast::Assignment& assignment) {
     print_indent();
     stream << assignment.identifier << " := ";
-    node(*assignment.value.get());
+    node(*assignment.value);
     stream << ";\n";
     return stream;
   }
 
   std::ostream& print_body(ast::Body body) {
     for (auto it = body.begin(); it != body.end(); ++it) {
-      node(*(it->get()));
+      node(**it);
     }
     return stream;
   }
@@ -144,7 +144,7 @@ class PrettyPrinter {
   std::ostream& print_while(const ast::While& whil) {
     print_indent();
     stream << "while(";
-    node(*whil.condition.get());
+    node(*whil.condition);
     stream << ") {\n";
     this->indent += 2;
     print_body(whil.body);
@@ -155,7 +155,7 @@ class PrettyPrinter {
 
   std::ostream& print_void_context(const ast::VoidContext& void_context) {
     print_indent();
-    node(*void_context.operation.get());
+    node(*void_context.operation);
     stream << ";\n";
     return stream;
   }
@@ -328,7 +328,7 @@ public:
 
   std::ostream& program(const ast::Program& program) {
     for (auto it = program.body.begin(); it != program.body.end(); ++it) {
-      node(*(it->get()));
+      node(**it);
     }
     return stream;
   }
