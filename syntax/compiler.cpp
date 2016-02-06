@@ -58,6 +58,8 @@ class Compiler {
   }
 
   llvm::Value* compile_variable(ast::Variable* var) {
+    assert(var != nullptr);
+
     auto ptr = variables.find(var->identifier);
     assert(ptr != variables.end());
     return this->ctx.Builder.CreateLoad(ptr->getValue());
@@ -197,6 +199,7 @@ class Compiler {
 
   llvm::Value* compile_call(ast::Call* call) {
     assert(call != nullptr);
+
     auto func = functions.find(call->function_name);
     assert(func != functions.end());
     std::vector<llvm::Value*> arguments;
