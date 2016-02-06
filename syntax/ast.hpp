@@ -115,7 +115,7 @@ namespace ast {
   struct Constant : public abstract::Operation {
     std::shared_ptr<types::abstract::Value> value;
     RealNodeType node_type() const { return ConstantNode; }
-    Constant(std::shared_ptr<types::abstract::Value> value_)
+    explicit Constant(std::shared_ptr<types::abstract::Value> value_)
       : value(value_) {
       this->type = value_->type();
     }
