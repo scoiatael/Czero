@@ -228,6 +228,7 @@ class Compiler {
     auto exit_block = llvm::BasicBlock::Create(this->ctx.llvmContext,
                                                "exit",
                                                this->current_function);
+    this->ctx.Builder.CreateBr(condition_block);
     this->ctx.Builder.SetInsertPoint(condition_block);
     auto jump_condition = operation(branch->condition.get());
     this->ctx.Builder.CreateCondBr(jump_condition, then_block, else_block);
@@ -247,7 +248,7 @@ class Compiler {
     assert(ptr != variables.end());
 
     auto val = operation(assignment->value.get());
-    this->ctx.Builder.CreateStore(ptr->getValue(), val);
+    this->ctx.Builder.CreateStore(val, ptr->getValue());
     return EXIT_SUCCESS;
   }
 
@@ -263,6 +264,7 @@ class Compiler {
     auto exit_block = llvm::BasicBlock::Create(this->ctx.llvmContext,
                                                "exit",
                                                this->current_function);
+    this->ctx.Builder.CreateBr(condition_block);
     this->ctx.Builder.SetInsertPoint(condition_block);
     auto jump_condition = operation(whil->condition.get());
     this->ctx.Builder.CreateCondBr(jump_condition, body_block, exit_block);
