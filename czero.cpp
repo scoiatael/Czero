@@ -59,6 +59,6 @@ int main(int argc, char *argv[]) {
   auto main_return_value_value = dynamic_cast<ast::types::IntValue*>(main_return_value->value.get());
   main_return_value_value->value = 0;
 
-  pretty_print::program(&program);
+  std::cout << program;
   return 0;
 }
