@@ -18,11 +18,11 @@ int main(int argc, char *argv[]) {
     std::cout << tt.lookahead.front() << std::endl;
 #endif
 
-#ifdef TEST_PARSER
-    //varstore vs;
-    //parser(tt, vs, tkn_OP, 10);
-    //ASSERT(tt.lookahead.size());
-#endif
+//#ifdef TEST_PARSER
+    varstore vs;
+    parser(tt, vs, tkn_OP, 10);
+    ASSERT(tt.lookahead.size());
+//#endif
 
 #ifdef TEST_PRINTER
   ast::Program program;
