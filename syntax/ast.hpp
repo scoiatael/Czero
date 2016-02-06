@@ -22,18 +22,26 @@ namespace ast {
     struct BoolValue : public abstract::Value {
       bool value;
       Type type() const { return Bool; }
+      explicit BoolValue(bool value_) : value(value_) {}
+      BoolValue() = default;
     };
     struct FloatValue : public abstract::Value {
       float value;
       Type type() const { return Float32; }
+      explicit FloatValue(float value_) : value(value_) {}
+      FloatValue() = default;
     };
     struct IntValue : public abstract::Value {
       int value;
       Type type() const { return Int32; }
+      explicit IntValue(int value_) : value(value_) {}
+      IntValue() = default;
       };
     struct StringValue : public abstract::Value {
       std::string value;
       Type type() const { return String; }
+      explicit StringValue(std::string value_) : value(value_) {}
+      StringValue() = default;
     };
   };
 
@@ -83,6 +91,11 @@ namespace ast {
   struct Variable : public abstract::Operation {
     Identifier identifier;
     RealNodeType node_type() const { return VariableNode; }
+    explicit Variable(Identifier identifier_, ast::types::Type type_ = ast::types::Poison)
+      : identifier(identifier_) {
+      this->type = type_;
+    }
+    Variable() = default;
   };
 
   struct Extern : public abstract::Declaration {
@@ -102,6 +115,11 @@ namespace ast {
   struct Constant : public abstract::Operation {
     std::shared_ptr<types::abstract::Value> value;
     RealNodeType node_type() const { return ConstantNode; }
+    Constant(std::shared_ptr<types::abstract::Value> value_)
+      : value(value_) {
+      this->type = value_->type();
+    }
+    Constant() = default;
   };
 
   struct Cast : public abstract::Operation {
@@ -156,6 +174,9 @@ namespace ast {
   struct VoidContext : public abstract::Statement {
     std::shared_ptr<abstract::Operation> operation;
     RealNodeType node_type() const { return VoidContextNode; }
+    explicit VoidContext(std::shared_ptr<abstract::Operation> operation_)
+      : operation(operation_) {}
+    VoidContext() = default;
   };
 
   struct Program {
