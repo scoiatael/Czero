@@ -5,30 +5,26 @@ int main(int argc, char *argv[]) {
   ast::Program program;
 
   // Create printf prototype
-  program.body.push_back(std::make_shared<ast::Extern>());
   std::string printf_function("printf");
-  auto printf = dynamic_cast<ast::Extern*>(program.body[0].get());
+  auto printf = std::make_shared<ast::Extern>();
   printf->identifier = printf_function;
   printf->return_value = ast::types::Int32;
   printf->variadic = true;
-  printf->arguments.push_back(ast::Variable());
-  printf->arguments[0].type = ast::types::String;
-  printf->arguments[0].identifier = "format";
+  printf->arguments.push_back(ast::Variable("format", ast::types::String));
+  program.body.push_back(printf);
 
   // Create main prototype
-  program.body.push_back(std::make_shared<ast::Func>());
-  auto main = dynamic_cast<ast::Func*>(program.body[1].get());
+  auto hello_var = ast::Variable("hello_var", ast::types::String);
+  auto main = std::make_shared<ast::Func>();
   main->identifier = "main";
   main->return_value = ast::types::Int32;
+  program.body.push_back(main);
 
   // Create variable holding value "Hello world!"
-  std::string hello_world_variable("hello_world_str");
-  main->local_variables.push_back(ast::Variable());
-  main->local_variables[0].type = ast::types::String;
-  main->local_variables[0].identifier = hello_world_variable;
-  main->body.push_back(std::make_shared<ast::Assignment>());
-  auto hello_world_var_assignment = dynamic_cast<ast::Assignment*>(main->body[0].get());
-  hello_world_var_assignment->identifier = hello_world_variable;
+  main->local_variables.push_back(hello_var);
+  auto hello_world_var_assignment = std::make_shared<ast::Assignment>();
+  main->body.push_back(hello_world_var_assignment);
+  hello_world_var_assignment->identifier = hello_var.identifier;
   hello_world_var_assignment->value = std::make_shared<ast::Constant>();
   auto hello_world_constant =
     dynamic_cast<ast::Constant*>(hello_world_var_assignment->value.get());
@@ -39,19 +35,19 @@ int main(int argc, char *argv[]) {
   hello_world_constant_value->value = "Hello world!\n";
 
   // Call printf(hello_world)
-  main->body.push_back(std::make_shared<ast::VoidContext>());
-  auto printf_context = dynamic_cast<ast::VoidContext*>(main->body[1].get());
+  auto printf_context = std::make_shared<ast::VoidContext>();
+  main->body.push_back(printf_context);
   printf_context->operation = std::make_shared<ast::Call>();
   auto printf_call = dynamic_cast<ast::Call*>(printf_context->operation.get());
   printf_call->function_name = printf_function;
-  printf_call->arguments.push_back(std::make_shared<ast::Variable>());
-  auto get_hello_world_value = dynamic_cast<ast::Variable*>(printf_call->arguments[0].get());
+  auto get_hello_world_value = std::make_shared<ast::Variable>();
+  printf_call->arguments.push_back(get_hello_world_value);
   get_hello_world_value->type = ast::types::String;
-  get_hello_world_value->identifier = hello_world_variable;
+  get_hello_world_value->identifier = hello_var.identifier;
 
   // Return 0 for good measure
-  main->body.push_back(std::make_shared<ast::Return>());
-  auto main_return = dynamic_cast<ast::Return*>(main->body[2].get());
+  auto main_return = std::make_shared<ast::Return>();
+  main->body.push_back(main_return);
   main_return->value = std::make_shared<ast::Constant>();
   auto main_return_value = dynamic_cast<ast::Constant*>(main_return->value.get());
   main_return_value->type = ast::types::Int32;
