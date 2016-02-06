@@ -159,6 +159,34 @@ class Compiler {
       if(bin_op->operator_ == "or") {
         return this->ctx.Builder.CreateOr(lhs_value, rhs_value);
       }
+      switch (bin_op->left->type) {
+      case ast::types::Float32:
+        if(bin_op->operator_ == "eq") {
+          return this->ctx.Builder.CreateFCmpOEQ(lhs_value, rhs_value);
+        }
+        if(bin_op->operator_ == "lt") {
+          return this->ctx.Builder.CreateFCmpOLT(lhs_value, rhs_value);
+        }
+        break;
+      case ast::types::Int32:
+        if(bin_op->operator_ == "eq") {
+          return this->ctx.Builder.CreateICmpEQ(lhs_value, rhs_value);
+        }
+        if(bin_op->operator_ == "lt") {
+          return this->ctx.Builder.CreateICmpSLT(lhs_value, rhs_value);
+        }
+        break;
+      case ast::types::Bool:
+        if(bin_op->operator_ == "eq") {
+          return this->ctx.Builder.CreateICmpEQ(lhs_value, rhs_value);
+        }
+        if(bin_op->operator_ == "lt") {
+          return this->ctx.Builder.CreateICmpULT(lhs_value, rhs_value);
+        }
+        break;
+      default:
+        assert(false);
+      }
       break;
     default:
       assert(false);
