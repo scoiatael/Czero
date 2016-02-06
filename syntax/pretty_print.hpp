@@ -7,9 +7,13 @@
 #include <boost/regex.hpp>
 
 namespace pretty_print {
-  int node(ast::abstract::Node* node);
-  int value(ast::types::abstract::Value* value);
-  int program(ast::Program* program);
+  std::ostream& node(std::ostream&, const ast::abstract::Node&);
+  std::ostream& value(std::ostream&, const ast::types::abstract::Value&);
+  std::ostream& program(std::ostream&, const ast::Program&);
 }
+
+std::ostream& operator << (std::ostream&, const ast::abstract::Node&);
+std::ostream& operator << (std::ostream&, const ast::types::abstract::Value&);
+std::ostream& operator << (std::ostream&, const ast::Program&);
 
 #endif
