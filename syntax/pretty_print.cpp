@@ -84,7 +84,7 @@ class PrettyPrinter {
   std::ostream& print_bin_op(const ast::BinOp& bin_op) {
     stream << "(";
     node(*bin_op.left);
-    stream << ")" << bin_op.operator_ << "(";
+    stream << ") `" << bin_op.operator_ << "` (";
     node(*bin_op.right);
     stream << ")";
     return stream;
@@ -149,6 +149,7 @@ class PrettyPrinter {
     this->indent += 2;
     print_body(whil.body);
     this->indent -= 2;
+    print_indent();
     stream << "}\n";
     return stream;
   }
