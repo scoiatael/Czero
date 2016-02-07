@@ -161,7 +161,7 @@ class Compiler {
       if(bin_op->operator_ == "or") {
         return this->ctx.Builder.CreateOr(lhs_value, rhs_value);
       }
-      switch (bin_op->left->type) {
+      switch (bin_op->to) {
       case ast::types::Float32:
         if(bin_op->operator_ == "eq") {
           return this->ctx.Builder.CreateFCmpOEQ(lhs_value, rhs_value);
