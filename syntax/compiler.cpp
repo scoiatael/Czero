@@ -321,10 +321,13 @@ class Compiler {
     return extrnf;
   }
 
-  int allocate_variable(ast::Variable& it) {
+  int allocate_variable(ast::Variable& it, llvm::Value* value = nullptr) {
     auto alloc_inst = this->ctx.Builder.CreateAlloca(llvm_type_for(it.type));
     variables.insert(std::pair<llvm::StringRef, llvm::Value*>(it.identifier,
                                                               alloc_inst));
+    if(value != nullptr) {
+      this->ctx.Builder.CreateStore(value, alloc_inst);
+    }
     return EXIT_SUCCESS;
   }
 
@@ -337,7 +340,10 @@ class Compiler {
 
     // Allocate memory on stack for function argument variables
     for (auto it = func->arguments.begin(); it != func->arguments.end(); ++it) {
-      allocate_variable(*it);
+      auto index = std::distance(func->arguments.begin(), it);
+      auto arg = std::next(decl->arg_begin(), index);
+      assert(arg != decl->arg_end());
+      allocate_variable(*it, arg);
     }
     // Allocate memory on stack for local variables
     for (auto it = func->local_variables.begin(); it != func->local_variables.end(); ++it) {
