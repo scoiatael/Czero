@@ -16,6 +16,8 @@ class Compiler {
       return llvm::Type::getInt32Ty(this->ctx.llvmContext);
     case ast::types::String:
       return llvm::Type::getInt8PtrTy(this->ctx.llvmContext);
+    case ast::types::Void:
+      return llvm::Type::getVoidTy(this->ctx.llvmContext);
     default:
       assert(false);
     }
@@ -211,8 +213,13 @@ class Compiler {
 
   int compile_return(ast::Return* retrn) {
     assert(retrn != nullptr);
-    auto val = operation(retrn->value.get());
-    this->ctx.Builder.CreateRet(val);
+    assert(retrn->value.get() != nullptr);
+    if(retrn->value->type == ast::types::Void) {
+      this->ctx.Builder.CreateRetVoid();
+    } else {
+      auto val = operation(retrn->value.get());
+      this->ctx.Builder.CreateRet(val);
+    }
     return EXIT_SUCCESS;
   }
 

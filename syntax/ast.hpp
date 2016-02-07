@@ -9,7 +9,7 @@ namespace ast {
   int generate_new_id();
 
   namespace types {
-    enum Type { Poison, Int32, Float32, Bool, String };
+    enum Type { Poison, Void, Int32, Float32, Bool, String };
 
     namespace abstract {
       struct Value {
@@ -42,6 +42,9 @@ namespace ast {
       Type type() const { return String; }
       explicit StringValue(std::string value_) : value(value_) {}
       StringValue() = default;
+    };
+    struct VoidValue : public abstract::Value {
+      Type type() const { return Void; }
     };
   };
 

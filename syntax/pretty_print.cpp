@@ -246,6 +246,9 @@ public:
     case ast::types::String:
       stream << "[String]";
       break;
+    case ast::types::Void:
+      stream << "[Void]";
+      break;
     default:
       stream << "[Unknown Value]";
     }
@@ -273,6 +276,9 @@ public:
                 << boost::regex_replace(asString(value).value, esc, rep,
                                         boost::match_default | boost::format_sed)
                 << "\"";
+      break;
+    case ast::types::Void:
+      stream << "()";
       break;
     default:
       stream << " ??";
