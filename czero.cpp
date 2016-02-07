@@ -13,6 +13,28 @@ int main(int argc, char *argv[]) {
   printf->arguments.push_back(ast::Variable("format", ast::types::String));
   program.body.push_back(printf);
 
+  // Create hello_world prototype
+  auto hello_world = std::make_shared<ast::Func>();
+  hello_world->identifier = "hello_world";
+  hello_world->return_value = ast::types::Void;
+  hello_world->arguments.push_back(ast::Variable("i", ast::types::Int32));
+  program.body.push_back(hello_world);
+
+  // Call printf(hello_world)
+  auto printf_call = std::make_shared<ast::Call>();
+  printf_call->function_name = printf_function;
+  printf_call->arguments.push_back(std::make_shared<ast::Constant>
+                                   (std::make_shared<ast::types::StringValue>
+                                    ("Hello world! (%d)\n")));
+  printf_call->arguments.push_back(std::make_shared<ast::Variable>("i", ast::types::Int32));
+  hello_world->body.push_back(std::make_shared<ast::VoidContext>(printf_call));
+
+  // Return void
+  auto hello_world_return = std::make_shared<ast::Return>();
+  hello_world_return->value =
+    std::make_shared<ast::Constant>(std::make_shared<ast::types::VoidValue>());
+  hello_world->body.push_back(hello_world_return);
+
   // Create main prototype
   auto i_var = ast::Variable("i", ast::types::Int32);
   auto main = std::make_shared<ast::Func>();
@@ -20,13 +42,6 @@ int main(int argc, char *argv[]) {
   main->return_value = ast::types::Int32;
   main->local_variables.push_back(i_var);
   program.body.push_back(main);
-
-  // Call printf(hello_world)
-  auto printf_call = std::make_shared<ast::Call>();
-  printf_call->function_name = printf_function;
-  printf_call->arguments.push_back(std::make_shared<ast::Constant>
-                                   (std::make_shared<ast::types::StringValue>
-                                    ("Hello world!\n")));
 
   // while(i < 3) { printf("Hello world\n"); i--; }
   auto whil = std::make_shared<ast::While>();
@@ -39,7 +54,10 @@ int main(int argc, char *argv[]) {
   cond->right = cond_rhs;
   cond->type = ast::types::Bool;
   whil->condition = cond;
-  whil->body.push_back(std::make_shared<ast::VoidContext>(printf_call));
+  auto hello_world_call = std::make_shared<ast::Call>();
+  hello_world_call->function_name = hello_world->identifier;
+  hello_world_call->arguments.push_back(std::make_shared<ast::Variable>(i_var));
+  whil->body.push_back(std::make_shared<ast::VoidContext>(hello_world_call));
 
   auto decr = std::make_shared<ast::BinOp>();
   decr->operator_ = "add";
