@@ -349,7 +349,6 @@ class Compiler {
     for (auto it = func->local_variables.begin(); it != func->local_variables.end(); ++it) {
       allocate_variable(*it);
     }
-    // TODO: store argument values in memory
     this->current_function = decl;
     compile_body(func->body);
 
