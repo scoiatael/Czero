@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
   auto whil = std::make_shared<ast::While>();
   auto cond = std::make_shared<ast::BinOp>();
   cond->operator_ = "lt";
-  cond->to = ast::types::Int32;
+  cond->from = ast::types::Int32;
   auto cond_lhs = std::make_shared<ast::Variable>(i_var);
   auto cond_rhs = std::make_shared<ast::Constant>(std::make_shared<ast::types::IntValue>(3));
   cond->left = cond_lhs;

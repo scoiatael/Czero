@@ -38,7 +38,7 @@ class Compiler {
   }
 
   llvm::Value* compile_string(ast::types::StringValue* value) {
-    return ctx.Builder.CreateGlobalStringPtr(value->value);
+    return this->ctx.Builder.CreateGlobalStringPtr(value->value);
   }
 
   llvm::Value* value(ast::types::abstract::Value* value) {
@@ -163,7 +163,7 @@ class Compiler {
       if(bin_op->operator_ == "or") {
         return this->ctx.Builder.CreateOr(lhs_value, rhs_value);
       }
-      switch (bin_op->to) {
+      switch (bin_op->from) {
       case ast::types::Float32:
         if(bin_op->operator_ == "eq") {
           return this->ctx.Builder.CreateFCmpOEQ(lhs_value, rhs_value);
