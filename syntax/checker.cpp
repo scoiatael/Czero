@@ -290,6 +290,7 @@ class Checker {
     this->current_function = func;
     check_body(func->body);
 
+    // TODO: check for return value?
     this->current_function = nullptr;
     variables.clear();
     return EXIT_SUCCESS;
