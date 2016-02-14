@@ -432,7 +432,7 @@ public:
     for (auto it = program->body.begin(); it != program->body.end(); ++it) {
       node(it->get());
     }
-    this->ctx.currentModule->dump();
+    // this->ctx.currentModule->dump();
     return EXIT_SUCCESS;
   }
 };

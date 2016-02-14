@@ -79,7 +79,15 @@ int main(int argc, char *argv[]) {
     std::make_shared<ast::Constant>(std::make_shared<ast::types::IntValue>(0));
   main->body.push_back(main_return);
 
+  // Dump pretty printed program
   std::cout << program;
+
+  // Check for errors
+  std::cout << "\nErrors: \n";
+  checker::program(&program);
+  std::cout << "---\n";
+
+  // Compile
   auto ir = ir_generator::Context("czero_main");
   compiler::program(&program, ir);
   if(argc > 1) {

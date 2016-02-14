@@ -341,8 +341,13 @@ public:
   }
 };
 
+std::ostream& pretty_print::type(std::ostream& stream,
+                                 const ast::types::Type type) {
+  return PrettyPrinter(stream).type(type);
+}
+
 std::ostream& pretty_print::node(std::ostream& stream,
-        const ast::abstract::Node& node) {
+                                 const ast::abstract::Node& node) {
   return PrettyPrinter(stream).node(node);
 }
 
