@@ -68,7 +68,7 @@ class PrettyPrinter {
 
   std::ostream& print_cast(const ast::Cast& cast) {
     stream << "cast";
-    type(cast.to);
+    type(cast.type);
     stream << " ";
     node(*cast.value);
     return stream;

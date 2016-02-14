@@ -126,7 +126,6 @@ namespace ast {
   };
 
   struct Cast : public abstract::Operation {
-    types::Type to;
     std::shared_ptr<abstract::Operation> value;
     RealNodeType node_type() const { return CastNode; }
   };

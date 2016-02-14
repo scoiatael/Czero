@@ -75,19 +75,20 @@ class Compiler {
   llvm::Value* compile_cast(ast::Cast* cast) {
     assert(cast != nullptr);
     auto value = operation(cast->value.get());
+    auto type = llvm_type_for(cast->type);
     switch(cast->type) {
     case ast::types::Int32:
       return this->ctx.Builder.CreateIntCast(value,
-                                             llvm_type_for(cast->to),
+                                             type,
                                              /* isSigned */ true);
       break;
     case ast::types::Float32:
       return this->ctx.Builder.CreateFPCast(value,
-                                            llvm_type_for(cast->to));
+                                            type);
       break;
     case ast::types::Bool:
       return this->ctx.Builder.CreateIntCast(value,
-                                             llvm_type_for(cast->to),
+                                             type,
                                              /* isSigned */ false);
       break;
     default:
