@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
   printf_call->arguments.push_back(std::make_shared<ast::Constant>
                                    (std::make_shared<ast::types::StringValue>
                                     ("Hello world! (%d)\n")));
-  printf_call->arguments.push_back(std::make_shared<ast::Variable>("i", ast::types::Int32));
+  printf_call->arguments.push_back(std::make_shared<ast::Variable>("i"));
   auto printf_void_call = std::make_shared<ast::Cast>();
   printf_void_call->type = ast::types::Void;
   printf_void_call->value = printf_call;
@@ -50,12 +50,10 @@ int main(int argc, char *argv[]) {
   auto whil = std::make_shared<ast::While>();
   auto cond = std::make_shared<ast::BinOp>();
   cond->operator_ = "lt";
-  cond->from = ast::types::Int32;
   auto cond_lhs = std::make_shared<ast::Variable>(i_var);
   auto cond_rhs = std::make_shared<ast::Constant>(std::make_shared<ast::types::IntValue>(3));
   cond->left = cond_lhs;
   cond->right = cond_rhs;
-  cond->type = ast::types::Bool;
   whil->condition = cond;
   auto hello_world_call = std::make_shared<ast::Call>();
   hello_world_call->function_name = hello_world->identifier;
@@ -68,7 +66,6 @@ int main(int argc, char *argv[]) {
   auto decr_rhs = std::make_shared<ast::Constant>(std::make_shared<ast::types::IntValue>(1));
   decr->left = decr_lhs;
   decr->right = decr_rhs;
-  decr->type = ast::types::Int32;
   auto assign = std::make_shared<ast::Assignment>();
   assign->identifier = i_var.identifier;
   assign->value = decr;
