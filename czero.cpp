@@ -27,7 +27,10 @@ int main(int argc, char *argv[]) {
                                    (std::make_shared<ast::types::StringValue>
                                     ("Hello world! (%d)\n")));
   printf_call->arguments.push_back(std::make_shared<ast::Variable>("i", ast::types::Int32));
-  hello_world->body.push_back(std::make_shared<ast::VoidContext>(printf_call));
+  auto printf_void_call = std::make_shared<ast::Cast>();
+  printf_void_call->type = ast::types::Void;
+  printf_void_call->value = printf_call;
+  hello_world->body.push_back(std::make_shared<ast::VoidContext>(printf_void_call));
 
   // Return void
   auto hello_world_return = std::make_shared<ast::Return>();
@@ -79,13 +82,13 @@ int main(int argc, char *argv[]) {
     std::make_shared<ast::Constant>(std::make_shared<ast::types::IntValue>(0));
   main->body.push_back(main_return);
 
+  // Check for errors
+  std::cout << "Errors: \n";
+  checker::program(&program);
+  std::cout << "---\n\n";
+
   // Dump pretty printed program
   std::cout << program;
-
-  // Check for errors
-  std::cout << "\nErrors: \n";
-  checker::program(&program);
-  std::cout << "---\n";
 
   // Compile
   auto ir = ir_generator::Context("czero_main");

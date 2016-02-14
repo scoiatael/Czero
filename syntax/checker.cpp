@@ -71,6 +71,7 @@ class Checker {
     case ast::types::Int32:
     case ast::types::Float32:
     case ast::types::Bool:
+    case ast::types::Void:
       break;
     default:
       std::cout << "Bad cast type: "

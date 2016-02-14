@@ -91,6 +91,9 @@ class Compiler {
                                              type,
                                              /* isSigned */ false);
       break;
+    case ast::types::Void:
+      // No-op for sake of checker
+      return value;
     default:
       assert(false);
     }
