@@ -12,6 +12,7 @@
 #include "util/ir_generator.hpp"
 #include "syntax/ast.hpp"
 #include "syntax/pretty_print.hpp"
+#include "syntax/checker.hpp"
 #include "syntax/compiler.hpp"
 
 #endif

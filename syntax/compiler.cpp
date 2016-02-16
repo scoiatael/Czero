@@ -91,6 +91,9 @@ class Compiler {
                                              type,
                                              /* isSigned */ false);
       break;
+    case ast::types::Void:
+      // No-op for sake of checker
+      return value;
     default:
       assert(false);
     }
@@ -432,7 +435,7 @@ public:
     for (auto it = program->body.begin(); it != program->body.end(); ++it) {
       node(it->get());
     }
-    this->ctx.currentModule->dump();
+    // this->ctx.currentModule->dump();
     return EXIT_SUCCESS;
   }
 };
