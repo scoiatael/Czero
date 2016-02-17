@@ -2,101 +2,98 @@
 
 class PrettyPrinter {
   int indent = 0;
+  std::ostream& stream;
 
-  std::ostream& print_indent(std::ostream& stream) {
+  std::ostream& print_indent() {
     for (int i = 0; i < this->indent; i++) {
       stream << " ";
     }
     return stream;
   }
 
-  std::ostream& print_func_header(std::ostream& stream, 
-          const ast::Extern& extrn) {
+  std::ostream& print_func_header(const ast::Extern& extrn) {
     stream << extrn.identifier << "(";
     for (auto it = extrn.arguments.begin(); it != extrn.arguments.end(); ++it) {
       stream << it->identifier << " : ";
-      type(stream, it->type);
+      type(it->type);
       if((std::next(it)) != extrn.arguments.end()) {
         stream << ", ";
       }
     }
     stream << (extrn.variadic ? ", ..." : "") << ")" << " : ";
-    type(stream, extrn.return_value);
+    type(extrn.return_value);
     return stream;
   }
 
-  std::ostream& print_func(std::ostream& stream, const ast::Func& func) {
+  std::ostream& print_func(const ast::Func& func) {
     stream << "fun ";
-    print_func_header(stream, dynamic_cast<const ast::Extern&>(func));
+    print_func_header(func);
     stream << " {\n";
     this->indent = 2;
-    print_indent(stream);
+    print_indent();
     stream <<  "vars {\n";
     this->indent += 2;
-    for (auto it = func.local_variables.begin(); 
+    for (auto it = func.local_variables.begin();
             it != func.local_variables.end(); ++it) {
-      print_indent(stream);
-      type(stream, it->type);
+      print_indent();
+      type(it->type);
       stream << " " << it->identifier << ";\n";
     }
     this->indent -= 2;
-    print_indent(stream);
+    print_indent();
     stream << "}\n";
-    print_body(stream, func.body);
+    print_body(func.body);
     stream << "}\n";
     this->indent = 0;
     return stream;
   }
 
-  std::ostream& print_extern(std::ostream& stream, const ast::Extern& extrn) {
+  std::ostream& print_extern(const ast::Extern& extrn) {
     stream << "extern ";
-    print_func_header(stream, extrn);
+    print_func_header(extrn);
     stream << ";\n";
     return stream;
   }
 
-  std::ostream& print_variable(std::ostream& stream, 
-          const ast::Variable& variable) {
-    type(stream, variable.type);
+  std::ostream& print_variable(const ast::Variable& variable) {
+    type(variable.type);
     stream << " " << variable.identifier;
     return stream;
   }
 
-  std::ostream& print_constant(std::ostream& stream,
-          const ast::Constant& constant) {
-    value(stream, dynamic_cast<const ast::types::abstract::Value&>
-            (*constant.value.get()));
+  std::ostream& print_constant(const ast::Constant& constant) {
+    value(*constant.value);
     return stream;
   }
 
-  std::ostream& print_cast(std::ostream& stream, const ast::Cast& cast) {
+  std::ostream& print_cast(const ast::Cast& cast) {
     stream << "cast";
-    type(stream, cast.to);
+    type(cast.type);
     stream << " ";
-    node(stream, dynamic_cast<const ast::abstract::Node&>(*cast.value.get()));
+    node(*cast.value);
     return stream;
   }
 
-  std::ostream& print_un_op(std::ostream& stream, const ast::UnOp& un_op) {
+  std::ostream& print_un_op(const ast::UnOp& un_op) {
     stream << un_op.operator_;
     stream << " ";
-    node(stream, dynamic_cast<const ast::abstract::Node&>(*un_op.value.get()));
+    node(*un_op.value);
     return stream;
   }
 
-  std::ostream& print_bin_op(std::ostream& stream, const ast::BinOp& bin_op) {
+  std::ostream& print_bin_op(const ast::BinOp& bin_op) {
     stream << "(";
-    node(stream, dynamic_cast<const ast::abstract::Node&>(*bin_op.left.get()));
-    stream << ")" << bin_op.operator_ << "(";
-    node(stream, dynamic_cast<const ast::abstract::Node&>(*bin_op.right.get()));
+    node(*bin_op.left);
+    stream << ") `" << bin_op.operator_ << "` (";
+    node(*bin_op.right);
     stream << ")";
     return stream;
   }
 
-  std::ostream& print_call(std::ostream& stream, const ast::Call& call) {
+  std::ostream& print_call(const ast::Call& call) {
     stream << call.function_name << "(";
     for (auto it = call.arguments.begin(); it != call.arguments.end(); ++it) {
-      node(stream, *(it->get()));
+      node(**it);
       if((std::next(it)) != call.arguments.end()) {
         stream << ", ";
       }
@@ -105,63 +102,61 @@ class PrettyPrinter {
     return stream;
   }
 
-  std::ostream& print_return(std::ostream& stream, const ast::Return& retrn) {
-    print_indent(stream);
+  std::ostream& print_return(const ast::Return& retrn) {
+    print_indent();
     stream << "return ";
-    node(stream, dynamic_cast<const ast::abstract::Node&>(*retrn.value.get()));
+    node(*retrn.value);
     stream << ";\n";
     return stream;
   }
 
-  std::ostream& print_branch(std::ostream& stream, const ast::Branch& branch) {
-    print_indent(stream);
+  std::ostream& print_branch(const ast::Branch& branch) {
+    print_indent();
     stream << "if(";
-    node(stream, 
-            dynamic_cast<const ast::abstract::Node&>(*branch.condition.get()));
+    node(*branch.condition);
     stream << ") {\n";
     this->indent += 2;
-    print_body(stream, branch.then_);
+    print_body(branch.then_);
     this->indent -= 2;
     stream << " }\n else {\n";
     this->indent += 2;
-    print_body(stream, branch.else_);
+    print_body(branch.else_);
     this->indent -= 2;
     stream << "}\n";
     return stream;
   }
 
-  std::ostream& print_assignment(std::ostream& stream, 
-          const ast::Assignment& assignment) {
-    print_indent(stream);
+  std::ostream& print_assignment(const ast::Assignment& assignment) {
+    print_indent();
     stream << assignment.identifier << " := ";
-    node(stream, *assignment.value.get());
+    node(*assignment.value);
     stream << ";\n";
     return stream;
   }
 
-  std::ostream& print_body(std::ostream& stream, ast::Body body) {
+  std::ostream& print_body(ast::Body body) {
     for (auto it = body.begin(); it != body.end(); ++it) {
-      node(stream, *(it->get()));
+      node(**it);
     }
     return stream;
   }
 
-  std::ostream& print_while(std::ostream& stream, const ast::While& whil) {
-    print_indent(stream);
+  std::ostream& print_while(const ast::While& whil) {
+    print_indent();
     stream << "while(";
-    node(stream, *whil.condition.get());
+    node(*whil.condition);
     stream << ") {\n";
     this->indent += 2;
-    print_body(stream, whil.body);
+    print_body(whil.body);
     this->indent -= 2;
+    print_indent();
     stream << "}\n";
     return stream;
   }
 
-  std::ostream& print_void_context(std::ostream& stream, 
-          const ast::VoidContext& void_context) {
-    print_indent(stream);
-    node(stream, *void_context.operation.get());
+  std::ostream& print_void_context(const ast::VoidContext& void_context) {
+    print_indent();
+    node(*void_context.operation);
     stream << ";\n";
     return stream;
   }
@@ -187,8 +182,10 @@ class PrettyPrinter {
   }
 
 public:
+  PrettyPrinter() : stream(std::cout) {}
+  PrettyPrinter(std::ostream& stream_) : stream(stream_) {}
 
-  std::ostream& node_type(std::ostream& stream, ast::RealNodeType node_type) {
+  std::ostream& node_type(ast::RealNodeType node_type) {
     switch(node_type) {
     case ast::VariableNode:
       stream << "[VariableNode]";
@@ -231,12 +228,11 @@ public:
       break;
     default:
       stream << "[Unknown Value]";
-      return stream;
     }
     return stream;
   }
 
-  std::ostream& type(std::ostream& stream, ast::types::Type type) {
+  std::ostream& type(ast::types::Type type) {
     switch(type) {
     case ast::types::Bool:
       stream << "[Bool]";
@@ -250,19 +246,20 @@ public:
     case ast::types::String:
       stream << "[String]";
       break;
+    case ast::types::Void:
+      stream << "[Void]";
+      break;
     default:
       stream << "[Unknown Value]";
-      return stream;
     }
     return stream;
   }
 
-  std::ostream& value(std::ostream& stream, 
-          const ast::types::abstract::Value& value) {
+  std::ostream& value(const ast::types::abstract::Value& value) {
     const boost::regex esc("\n");
     const std::string rep("\\\\n");
 
-    type(stream, value.type());
+    type(value.type());
     stream << " ";
     switch(value) {
     case ast::types::Bool:
@@ -280,53 +277,55 @@ public:
                                         boost::match_default | boost::format_sed)
                 << "\"";
       break;
+    case ast::types::Void:
+      stream << "()";
+      break;
     default:
       stream << " ??";
-      return stream;
     }
     return stream;
   }
 
-  std::ostream& node(std::ostream& stream, const ast::abstract::Node& node) {
+  std::ostream& node(const ast::abstract::Node& node) {
     switch(node) {
     case ast::ExternNode:
-      print_extern(stream, dynamic_cast<const ast::Extern&>(node));
+      print_extern(dynamic_cast<const ast::Extern&>(node));
       break;
     case ast::FuncNode:
-      print_func(stream, dynamic_cast<const ast::Func&>(node));
+      print_func(dynamic_cast<const ast::Func&>(node));
       break;
     case ast::VariableNode:
-      print_variable(stream, dynamic_cast<const ast::Variable&>(node));
+      print_variable(dynamic_cast<const ast::Variable&>(node));
       break;
     case ast::ConstantNode:
-      print_constant(stream, dynamic_cast<const ast::Constant&>(node));
+      print_constant(dynamic_cast<const ast::Constant&>(node));
       break;
     case ast::CastNode:
-      print_cast(stream, dynamic_cast<const ast::Cast&>(node));
+      print_cast(dynamic_cast<const ast::Cast&>(node));
       break;
     case ast::UnOpNode:
-      print_un_op(stream, dynamic_cast<const ast::UnOp&>(node));
+      print_un_op(dynamic_cast<const ast::UnOp&>(node));
       break;
     case ast::BinOpNode:
-      print_bin_op(stream, dynamic_cast<const ast::BinOp&>(node));
+      print_bin_op(dynamic_cast<const ast::BinOp&>(node));
       break;
     case ast::CallNode:
-      print_call(stream, dynamic_cast<const ast::Call&>(node));
+      print_call(dynamic_cast<const ast::Call&>(node));
       break;
     case ast::ReturnNode:
-      print_return(stream, dynamic_cast<const ast::Return&>(node));
+      print_return(dynamic_cast<const ast::Return&>(node));
       break;
     case ast::BranchNode:
-      print_branch(stream, dynamic_cast<const ast::Branch&>(node));
+      print_branch(dynamic_cast<const ast::Branch&>(node));
       break;
     case ast::AssignmentNode:
-      print_assignment(stream, dynamic_cast<const ast::Assignment&>(node));
+      print_assignment(dynamic_cast<const ast::Assignment&>(node));
       break;
     case ast::WhileNode:
-      print_while(stream, dynamic_cast<const ast::While&>(node));
+      print_while(dynamic_cast<const ast::While&>(node));
       break;
     case ast::VoidContextNode:
-      print_void_context(stream, dynamic_cast<const ast::VoidContext&>(node));
+      print_void_context(dynamic_cast<const ast::VoidContext&>(node));
       break;
     default:
       stream << "[Unknown Node] ??";
@@ -334,43 +333,45 @@ public:
     return stream;
   }
 
-  std::ostream& program(std::ostream& stream, const ast::Program& program) {
+  std::ostream& program(const ast::Program& program) {
     for (auto it = program.body.begin(); it != program.body.end(); ++it) {
-      node(stream, *(it->get()));
+      node(**it);
     }
     return stream;
   }
 };
 
+std::ostream& pretty_print::type(std::ostream& stream,
+                                 const ast::types::Type type) {
+  return PrettyPrinter(stream).type(type);
+}
+
 std::ostream& pretty_print::node(std::ostream& stream,
-        const ast::abstract::Node& node) {
-  return PrettyPrinter().node(stream, node);
+                                 const ast::abstract::Node& node) {
+  return PrettyPrinter(stream).node(node);
 }
 
-std::ostream& pretty_print::value(std::ostream& stream, 
+std::ostream& pretty_print::value(std::ostream& stream,
         const ast::types::abstract::Value& value) {
-  return PrettyPrinter().value(stream, value);
+  return PrettyPrinter(stream).value(value);
 }
 
-std::ostream& pretty_print::program(std::ostream& stream, 
+std::ostream& pretty_print::program(std::ostream& stream,
         const ast::Program& program) {
-  return PrettyPrinter().program(stream, program);
+  return PrettyPrinter(stream).program(program);
 }
 
-std::ostream& operator << (std::ostream& stream, 
-        const ast::abstract::Node& node)
-{
-    return PrettyPrinter().node(stream, node);
+std::ostream& operator << (std::ostream& stream,
+        const ast::abstract::Node& node) {
+  return pretty_print::node(stream, node);
 }
 
-std::ostream& operator << (std::ostream& stream, 
-        const ast::types::abstract::Value& value)
-{
-    return PrettyPrinter().value(stream, value);
+std::ostream& operator << (std::ostream& stream,
+        const ast::types::abstract::Value& value) {
+  return pretty_print::value(stream, value);
 }
 
-std::ostream& operator << (std::ostream& stream, 
-        const ast::Program& program)
-{
-    return PrettyPrinter().program(stream, program);
+std::ostream& operator << (std::ostream& stream,
+        const ast::Program& program) {
+  return pretty_print::program(stream, program);
 }

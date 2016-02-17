@@ -21,6 +21,8 @@ set(source
   ${CMAKE_CURRENT_SOURCE_DIR}/czero.cpp
   ${syntax}/ast.cpp
   ${syntax}/pretty_print.cpp
+  ${syntax}/checker.cpp
+  ${syntax}/compiler.cpp
   ${util}/ir_compiler.cpp
   ${util}/ir_generator.cpp
   ${parser}/varstore.cpp

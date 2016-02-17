@@ -15,5 +15,7 @@
 #include "syntax/pretty_print.hpp"
 #include "util/ir_compiler.hpp"
 #include "util/ir_generator.hpp"
+#include "syntax/checker.hpp"
+#include "syntax/compiler.hpp"
 
 #endif
