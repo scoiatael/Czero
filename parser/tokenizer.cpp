@@ -42,6 +42,29 @@ void tokenizer::scan( )
       return;
    }
 
+   if( r. lookahead == '"' ) // STRING
+   {
+       std::string s;
+       r. moveforward();
+       while(r.lookahead != '"')
+       {
+           if(r.lookahead == '\\') //escaped character
+           {
+               r. moveforward();
+               s += r.lookahead;
+           }
+           else
+           {
+               s += r.lookahead;
+           }
+           r . moveforward();
+       }
+       lookahead.push_back( tkn_STRING );
+       lookahead.back().id.push_back(s);
+       r. moveforward();
+       return;
+   }
+
    if( r. lookahead == ';' )
    {
       lookahead. push_back( tkn_SEMICOLON );
@@ -95,15 +118,15 @@ void tokenizer::scan( )
       else if(name == "xor")
          lookahead.push_back(tkn_XOR);
       else if(name == "bool")
-         lookahead.push_back(tkn_BOOL);
+         lookahead.push_back(tkn_TBOOL);
       else if(name == "int")
-         lookahead.push_back(tkn_INT);
+         lookahead.push_back(tkn_TINT);
       else if(name == "float")
-         lookahead.push_back(tkn_FLOAT);
+         lookahead.push_back(tkn_TFLOAT);
       else if(name == "string")
-         lookahead.push_back(tkn_STRING);
+         lookahead.push_back(tkn_TSTRING);
       else if(name == "ref")
-         lookahead.push_back(tkn_REF);
+         lookahead.push_back(tkn_TREF);
       else if(name == "struct")
          lookahead.push_back(tkn_STRUCT);
       else if(name == "fun")
@@ -122,6 +145,16 @@ void tokenizer::scan( )
          lookahead.push_back(tkn_IN);
       else if(name == "while")
          lookahead.push_back(tkn_WHILE);
+      else if(name == "true")
+      {
+         lookahead.push_back(tkn_BOOL);
+         lookahead.back().boolV.push_back(true);
+      }
+      else if(name == "false")
+      {
+         lookahead.push_back(tkn_BOOL);
+         lookahead.back().boolV.push_back(false);
+      }
       else
       {
          lookahead.push_back(tkn_IDENTIFIER);
