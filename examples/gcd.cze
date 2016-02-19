@@ -1,9 +1,30 @@
+extern printf(string format, int a, int b, int c) : void;
+extern malloc(int length) : string;
+extern scanf(string format, string out) : void;
+extern atoi(string number) : int;
+
 fun gcd (int a, int b) : int {
     int c;  // asdf
-    while (a != 0) {
+    while (0 < a) {
+        if (b < a) {
+           c = a;
+           a = b;
+           b = c;
+        }
         c = a;
-        a = b % a;
+        a = b - a;
         b = c;
     } 
     return b;
+}
+
+proc main() {
+  string s;
+  int a;
+  int b;
+  b = 2*3*5*7*11;
+  s = malloc(123);
+  scanf("%s\n", s);
+  a = atoi(s);
+  printf("%d %d -> %d", a, b, gcd(a,b));
 }
