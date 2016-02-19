@@ -42,6 +42,35 @@ void tokenizer::scan( )
       return;
    }
 
+   if( r. lookahead == '"' ) // STRING
+   {
+       std::string s;
+       r. moveforward();
+       while(r.lookahead != '"')
+       {
+           if(r.lookahead == '\\') //escaped character
+           {
+               r. moveforward();
+               switch(r.lookahead) {
+               case 'n':
+                 s += "\n";
+                 break;
+               default:
+                 s += r.lookahead;
+               }
+           }
+           else
+           {
+               s += r.lookahead;
+           }
+           r . moveforward();
+       }
+       lookahead.push_back( tkn_STRING );
+       lookahead.back().id.push_back(s);
+       r. moveforward();
+       return;
+   }
+
    if( r. lookahead == ';' )
    {
       lookahead. push_back( tkn_SEMICOLON );
@@ -71,19 +100,12 @@ void tokenizer::scan( )
       std::string name;
       name.push_back(r.lookahead);
 
-      //lookahead. push_back( tkn_IDENTIFIER );
-      //lookahead. back( ). id. push_back( std::string( ));
-         // This appends an empty string to id, so that
-         // we have a string attribute now.
-
-      //lookahead. back( ). id. back( ) += r. lookahead;
       r. moveforward( );
 
       while( isletter( r. lookahead ) || isdigit( r. lookahead ) ||
              r. lookahead == '_' )
       {
          name.push_back(r.lookahead);
-         //lookahead. back( ). id. back( ) += r. lookahead;
          r.moveforward();
       }
 
@@ -95,21 +117,25 @@ void tokenizer::scan( )
       else if(name == "xor")
          lookahead.push_back(tkn_XOR);
       else if(name == "bool")
-         lookahead.push_back(tkn_BOOL);
+         lookahead.push_back(tkn_TBOOL);
       else if(name == "int")
-         lookahead.push_back(tkn_INT);
+         lookahead.push_back(tkn_TINT);
       else if(name == "float")
-         lookahead.push_back(tkn_FLOAT);
+         lookahead.push_back(tkn_TFLOAT);
       else if(name == "string")
-         lookahead.push_back(tkn_STRING);
+         lookahead.push_back(tkn_TSTRING);
+      else if(name == "void")
+         lookahead.push_back(tkn_TVOID);
       else if(name == "ref")
-         lookahead.push_back(tkn_REF);
+         lookahead.push_back(tkn_TREF);
       else if(name == "struct")
          lookahead.push_back(tkn_STRUCT);
       else if(name == "fun")
          lookahead.push_back(tkn_FUN);
       else if(name == "proc")
          lookahead.push_back(tkn_PROC);
+      else if(name == "return")
+         lookahead.push_back(tkn_RETURN);
       else if(name == "if")
          lookahead.push_back(tkn_IF);
       else if(name == "then")
@@ -122,6 +148,18 @@ void tokenizer::scan( )
          lookahead.push_back(tkn_IN);
       else if(name == "while")
          lookahead.push_back(tkn_WHILE);
+      else if(name == "extern")
+         lookahead.push_back(tkn_EXTERN);
+      else if(name == "true")
+      {
+         lookahead.push_back(tkn_BOOL);
+         lookahead.back().boolV.push_back(true);
+      }
+      else if(name == "false")
+      {
+         lookahead.push_back(tkn_BOOL);
+         lookahead.back().boolV.push_back(false);
+      }
       else
       {
          lookahead.push_back(tkn_IDENTIFIER);
@@ -136,11 +174,6 @@ void tokenizer::scan( )
    {
       std::string s;
       bool isfloat = false;
-         // We keep the string, so that we can put it in
-         // a scanerror, if necessary.
-
-      // We do not allow the number to start with + or -, because
-      // this would bring us in conflict with the operators + and -.
 
       double val = 0.0;
       while( isdigit( r. lookahead ))
@@ -240,12 +273,12 @@ void tokenizer::scan( )
      if(isfloat)
      {
          lookahead.push_back(tkn_FLOAT);
-         lookahead.back().floatval.push_back(val);
+         lookahead.back().floatV.push_back(val);
      }
      else
      {
          lookahead.push_back(tkn_INT);
-         lookahead.back().intval.push_back((int)val);
+         lookahead.back().intV.push_back((int)val);
      }
      return;
    }
@@ -271,10 +304,29 @@ void tokenizer::scan( )
       return;
    }
 
+   if( r. lookahead == '%' )
+   {
+      lookahead. push_back( tkn_MOD );
+      r. moveforward( );
+      return;
+   }
+
    if( r. lookahead == '/' )
    {
-      lookahead. push_back( tkn_DIVIDES );
       r. moveforward( );
+      if( r. lookahead == '/' ) // comment
+      {
+          r. moveforward( );
+          while(r. lookahead != '\n')
+              r. moveforward( );
+          r. moveforward( );
+          scan();
+          //std::cout << "after comment\n";
+      }
+      else 
+      {
+          lookahead. push_back( tkn_DIVIDES );
+      }
       return;
    }
 

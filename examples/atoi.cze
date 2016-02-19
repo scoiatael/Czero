@@ -1,0 +1,8 @@
+extern atoi(string number) : int;
+extern printf(string format, string s, int code) : void;
+
+proc main() {
+  string s;
+  s = "123";
+  printf("%s -> %d", s, atoi(s));
+}

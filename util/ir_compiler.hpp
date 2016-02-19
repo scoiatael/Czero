@@ -8,7 +8,7 @@
 
 namespace ir_compiler {
   struct Options {
-    bool remove_ir_file;
+    bool remove_ir_file = true;
     bool verbose = false;
     std::string output_file_path;
     std::ostream& err = std::cerr;
