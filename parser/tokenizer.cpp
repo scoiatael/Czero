@@ -51,7 +51,13 @@ void tokenizer::scan( )
            if(r.lookahead == '\\') //escaped character
            {
                r. moveforward();
-               s += r.lookahead;
+               switch(r.lookahead) {
+               case 'n':
+                 s += "\n";
+                 break;
+               default:
+                 s += r.lookahead;
+               }
            }
            else
            {

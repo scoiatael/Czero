@@ -14,5 +14,5 @@ fun fib(int n) : int {
 proc main() {
   int num;
   num = 10;
-  printf("Fib %d -> %d", num, fib(num));
+  printf("Fib %d -> %d\n", num, fib(num));
 }
