@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 
 //#ifdef TEST_PARSER
     varstore vs;
-    parser(tt, vs, tkn_EXPRESS, 10);
+    parser(tt, vs, tkn_PROG, 10);
     ASSERT(tt.lookahead.size());
 //#endif
 

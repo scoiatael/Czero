@@ -94,19 +94,12 @@ void tokenizer::scan( )
       std::string name;
       name.push_back(r.lookahead);
 
-      //lookahead. push_back( tkn_IDENTIFIER );
-      //lookahead. back( ). id. push_back( std::string( ));
-         // This appends an empty string to id, so that
-         // we have a string attribute now.
-
-      //lookahead. back( ). id. back( ) += r. lookahead;
       r. moveforward( );
 
       while( isletter( r. lookahead ) || isdigit( r. lookahead ) ||
              r. lookahead == '_' )
       {
          name.push_back(r.lookahead);
-         //lookahead. back( ). id. back( ) += r. lookahead;
          r.moveforward();
       }
 

@@ -1,6 +1,5 @@
 #include "../assert.h"
 #include "../syntax/ast.hpp"
-#include "../syntax/pretty_print.hpp"
 
 
 %attribute reason    std::string
@@ -19,6 +18,9 @@
 %attribute boolV    bool
 %constraint BOOL boolV 1 2
 
+%attribute callP     std::shared_ptr<ast::Call>
+%constraint CALL callP 1 2
+
 %attribute exprP     std::shared_ptr<ast::abstract::Operation>
 %constraint EXPR exprP 1 2
 %constraint EXPRESS exprP 0
@@ -27,10 +29,22 @@
 %constraint STATEMENT statemP 1 2
 %constraint STATEMENTS statemP 0
 
-%attribute declP     std::shared_ptr<ast::abstract::Declaration>
+%attribute declP     ast::Variable
+%constraint DECLAR declP 1 2
+%constraint DECLARS declP 0
+%constraint ARGS declP 0
 
-%attribute callP     ast::Call
-%constraint CALL callP 1 2
+%attribute topP     ast::Func
+%constraint TOP topP 1 2
+%constraint PROG topP 0
+
+%attribute instP    instP_t
+%constraint INSTR instP 1 2
+%constraint PROG instP 0
+
+%attribute typeP    ast::types::Type
+%constraint TYPE typeP 1 2
+
 
 %token EOF SCANERROR
 %token SEMICOLON COLON COMMA
@@ -46,9 +60,9 @@
 %token IF THEN ELSE FOR IN WHILE 
 
 
-%token STATEMENT
-%token STATEMENTS
-%token TOP
+%token STATEMENT STATEMENTS
+%token DECLAR DECLARS
+%token TOP 
 %token INSTR
 %token DECL
 %token EXPR
@@ -64,90 +78,191 @@
 %intokenheader #include "varstore.h"
 %intokenheader #include "../syntax/ast.hpp"
 %intokenheader #include "../syntax/pretty_print.hpp"
+%intokenheader #include "../util/parser_misc.hpp"
 
-%startsymbol EXPRESS EOF
+%startsymbol PROG EOF
 
-% TYPE : TBOOL 
-%      | TINT 
-%      | TFLOAT 
-%      | TSTRING 
-%      | TREF
-%      ;
 
 % PROG : TOP
+
+    token p = tkn_PROG;
+    p.instP = TOP1->instP;
+    return p;
+
+%      | PROG TOP
+
+    PROG1->instP.push_back(TOP2->instP.front());
+    return PROG1;
+
 %      ;
 
-% TOP : STRUCT IDENTIFIER LCURLY FIELDS RCURLY
-%     | FUN IDENTIFIER LPAR ARGS RPAR COLON TYPE LCURLY INSTR RCURLY
+% TYPE : TBOOL
+
+    token t = tkn_TYPE;
+    t.typeP.push_back(ast::types::Bool);
+    return t;
+
+%      | TINT
+
+    token t = tkn_TYPE;
+    t.typeP.push_back(ast::types::Int32);
+    return t;
+
+%      | TFLOAT
+
+    token t = tkn_TYPE;
+    t.typeP.push_back(ast::types::Float32);
+    return t;
+
+%      | TSTRING
+
+    token t = tkn_TYPE;
+    t.typeP.push_back(ast::types::String);
+    return t;
+
+%      ;
+
+% TOP : FUN IDENTIFIER LPAR ARGS RPAR COLON TYPE LCURLY INSTR RCURLY
+
+    token t = tkn_TOP;
+    ast::Func f;
+    f.identifier = IDENTIFIER2->id.front();
+    f.return_value = TYPE7->typeP.front();
+    f.arguments = ARGS4->declP;
+    f.body = INSTR9->instP.front().second;
+    f.local_variables = INSTR9->instP.front().first;
+    t.topP.push_back(f);
+    return t;
+
 %     | PROC IDENTIFIER LPAR ARGS RPAR LCURLY INSTR RCURLY
-%     ;
 
-// XXX - empty structs permitted
-% FIELDS : TYPE IDENTIFIER SEMICOLON FIELDS
-%        |
-%        ;
-
-
-% ARGS : TYPE IDENTIFIER COMMA ARGS
-%     | TYPE IDENTIFIER
-
-    token a = tkn_ARGS;
-
-    return a;
+    token t = tkn_TOP;
+    ast::Func f;
+    f.identifier = IDENTIFIER2->id.front();
+    f.return_value = ast::types::Void;
+    f.arguments = ARGS4->declP;
+    f.body = INSTR7->instP.front().second;
+    f.local_variables = INSTR7->instP.front().first;
+    t.topP.push_back(f);
+    return t;
 
 %     ;
+
 
 % INSTR : DECLARS STATEMENTS
+
+    token i = tkn_INSTR;
+    i.instP.push_back(instP_t(DECLARS1->declP, STATEMENTS2->statemP));
+    return i;
+
 %       | STATEMENTS
+
+    token i = tkn_INSTR;
+    i.instP.push_back(instP_t(std::list<ast::Variable>(), 
+                STATEMENTS1->statemP));
+    return i;
+
 %       | DECLARS
+
+    token i = tkn_INSTR;
+    i.instP.push_back(instP_t(DECLARS1->declP, ast::Body()));
+    return i;
+
 %       ;
+
+
+% DECLARS : DECLAR SEMICOLON 
+
+    token d = tkn_DECLARS;
+    d.declP.push_back(DECLAR1->declP.front());
+    //pretty_print::node(std::cout, *d.declP.front().get()); 
+    return d;
+
+%         | DECLARS DECLAR SEMICOLON
+
+    //pretty_print::node(std::cout, *DECLAR2->declP.front().get()); 
+    DECLARS1->declP.push_back(DECLAR2->declP.front());
+    return DECLARS1;
+
+%         ;
+
+
+% ARGS : DECLAR 
+
+    token a = tkn_ARGS;
+    a.declP.push_back(DECLAR1->declP.front());
+    //pretty_print::node(std::cout, *a.declP.front().get()); 
+    return a;
+
+%      | ARGS COMMA DECLAR
+
+    //pretty_print::node(std::cout, *DECLAR3->declP.front().get()); 
+    ARGS1->declP.push_back(DECLAR3->declP.front());
+    return ARGS1;
+
+%      ;
+
+
+% DECLAR : TYPE IDENTIFIER 
+
+    token d = tkn_DECLAR;
+    ast::Variable var(IDENTIFIER2->id.front(), TYPE1->typeP.front());
+    d.declP.push_back(var);
+    return d;
+
+%        ;
+
 
 % STATEMENTS : STATEMENT
 
     token s = tkn_STATEMENTS;
     s.statemP.push_back(STATEMENT1->statemP.front());
+    //pretty_print::node(std::cout, *s.statemP.front().get()); 
     return s;
 
 %            | STATEMENTS SEMICOLON STATEMENT
 
+    //pretty_print::node(std::cout, *STATEMENT3->statemP.front().get()); 
     STATEMENTS1->statemP.push_back(STATEMENT3->statemP.front());
     return STATEMENTS1;
 
 %            ;
 
+
 % STATEMENT : CALL 
 
     token s = tkn_STATEMENT;
-    ast::VoidContext vc;
-    vc.operation = std::make_shared<ast::Call>(CALL1->callP.front());
+    ast::VoidContext vc(CALL1->callP.front());
     s.statemP.push_back(std::make_shared<ast::VoidContext>(vc));
     return s;
 
 %      | IDENTIFIER PLUS EQ EXPR
-
+    // XXX something broken
     token s = tkn_STATEMENT;
     ast::Assignment ass;
     ast::Variable var;
     ast::BinOp binop;
 
-    var.identifier = IDENTIFIER1->id.front();
+    std::cout << "cccC\n" << IDENTIFIER1->id.front() ;
+    //var.identifier = IDENTIFIER1->id.front();
 
-    binop.operator_ = PLUS2->id.front();
-    binop.left = std::make_shared<ast::Variable>(var);
-    binop.right = EXPR4->exprP.front();
+    //binop.operator_ = PLUS2->id.front();
+    //binop.left = std::make_shared<ast::Variable>(var);
+    //binop.right = EXPR4->exprP.front();
 
-    ass.identifier = var.identifier;
-    ass.value = std::make_shared<ast::BinOp>(binop);
+    //ass.identifier = var.identifier;
+    //ass.value = std::make_shared<ast::BinOp>(binop);
 
     s.statemP.push_back(std::make_shared<ast::Assignment>(ass));
     return s;
 
-%      | IF EXPR LCURLY STATEMENTS RCURLY
+%      | IF LPAR EXPR RPAR LCURLY STATEMENTS RCURLY
 
     token s = tkn_STATEMENT;
     ast::Branch branch;
-    branch.condition = EXPR2->exprP.front();
-    branch.then_ = STATEMENTS4->statemP;
+    branch.condition = EXPR3->exprP.front();
+    branch.then_ = STATEMENTS6->statemP;
+    s.statemP.push_back(std::make_shared<ast::Branch>(branch));
     return s;
 
 %      | WHILE LPAR EXPR RPAR LCURLY STATEMENTS RCURLY
@@ -156,62 +271,55 @@
     ast::While w;
     w.condition = EXPR3->exprP.front();
     w.body = STATEMENTS6->statemP;
+    s.statemP.push_back(std::make_shared<ast::While>(w));
     return s;
 
 %      ;
 
+
 % EXPR : IDENTIFIER
 
     token e = tkn_EXPR;
-    ast::Variable v;
-    v.identifier = IDENTIFIER1->id.front();
+    ast::Variable v(IDENTIFIER1->id.front());
     e.exprP.push_back(std::make_shared<ast::Variable>(v));
     return e;
 
 %      | INT
 
     token e = tkn_EXPR;
-    ast::Constant c;
-    ast::types::IntValue iv;
-    iv.value = INT1->intV.front();
-    c.value = std::make_shared<ast::types::IntValue>(iv);
+    ast::types::IntValue iv(INT1->intV.front());
+    ast::Constant c(std::make_shared<ast::types::IntValue>(iv));
     e.exprP.push_back(std::make_shared<ast::Constant>(c));
     return e;
 
 %      | FLOAT
 
     token e = tkn_EXPR;
-    ast::Constant c;
-    ast::types::FloatValue fv;
-    fv.value = FLOAT1->floatV.front();
-    c.value = std::make_shared<ast::types::FloatValue>(fv);
+    ast::types::FloatValue fv(FLOAT1->floatV.front());
+    ast::Constant c(std::make_shared<ast::types::FloatValue>(fv));
     e.exprP.push_back(std::make_shared<ast::Constant>(c));
     return e;
 
 %      | BOOL
 
     token e = tkn_EXPR;
-    ast::Constant c;
-    ast::types::BoolValue bv;
-    bv.value = BOOL1->boolV.front();
-    c.value = std::make_shared<ast::types::BoolValue>(bv);
+    ast::types::BoolValue bv(BOOL1->boolV.front());
+    ast::Constant c(std::make_shared<ast::types::BoolValue>(bv));
     e.exprP.push_back(std::make_shared<ast::Constant>(c));
     return e;
 
 %      | STRING
 
     token e = tkn_EXPR;
-    ast::Constant c;
-    ast::types::StringValue sv;
-    sv.value = STRING1->id.front();
-    c.value = std::make_shared<ast::types::StringValue>(sv);
+    ast::types::StringValue sv(STRING1->id.front());
+    ast::Constant c(std::make_shared<ast::types::StringValue>(sv));
     e.exprP.push_back(std::make_shared<ast::Constant>(c));
     return e;
 
 %      | CALL
 
     token e = tkn_EXPR;
-    e.exprP.push_back(std::make_shared<ast::Call>(CALL1->callP.front()));
+    e.exprP.push_back(CALL1->callP.front());
     return e;
 
 %      | EXPR OP EXPR
@@ -230,19 +338,22 @@
 
 %      ;
 
+
 % EXPRESS : EXPRESS COMMA EXPR
 
     EXPRESS1->exprP.push_back(EXPR3->exprP.front());
+    //pretty_print::node(std::cout, *EXPR3->exprP.front().get()); 
     return EXPRESS1;
 
 %         | EXPR
 
     token e = tkn_EXPRESS;
     e.exprP.push_back(EXPR1->exprP.front());
-    pretty_print::node(std::cout, *e.exprP.front().get()); 
+    //pretty_print::node(std::cout, *e.exprP.front().get()); 
     return e;
 
 %         ;
+
 
 % OP : PLUS
 
@@ -324,13 +435,14 @@
 
 %    ;
 
+
 % CALL : IDENTIFIER LPAR EXPRESS RPAR
 
     token call = tkn_CALL;
     ast::Call c;
     c.function_name = IDENTIFIER1->id.front();
     c.arguments = EXPRESS3->exprP;
-    call.callP.push_back(c);
+    call.callP.push_back(std::make_shared<ast::Call>(c));
     return call;
 
 %      | IDENTIFIER LPAR RPAR
@@ -338,7 +450,7 @@
     token call = tkn_CALL;
     ast::Call c;
     c.function_name = IDENTIFIER1->id.front();
-    call.callP.push_back(c);
+    call.callP.push_back(std::make_shared<ast::Call>(c));
     return call;
 
 %      ;
