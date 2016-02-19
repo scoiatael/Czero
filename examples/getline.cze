@@ -5,6 +5,6 @@ extern scanf(string format, string out) : void;
 proc main() {
   string s;
   s = malloc(123);
-  scanf("%s\n", s);
-  printf(s, "");
+  scanf("%s", s);
+  printf("READ: %s\n", s);
 }
