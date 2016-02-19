@@ -1,0 +1,5 @@
+extern printf(string format, int code) : void;
+fun main() : int
+{
+    printf("Hello, world: %d\n", 111);
+}

@@ -42,6 +42,35 @@ void tokenizer::scan( )
       return;
    }
 
+   if( r. lookahead == '"' ) // STRING
+   {
+       std::string s;
+       r. moveforward();
+       while(r.lookahead != '"')
+       {
+           if(r.lookahead == '\\') //escaped character
+           {
+               r. moveforward();
+               switch(r.lookahead) {
+               case 'n':
+                 s += "\n";
+                 break;
+               default:
+                 s += r.lookahead;
+               }
+           }
+           else
+           {
+               s += r.lookahead;
+           }
+           r . moveforward();
+       }
+       lookahead.push_back( tkn_STRING );
+       lookahead.back().id.push_back(s);
+       r. moveforward();
+       return;
+   }
+
    if( r. lookahead == ';' )
    {
       lookahead. push_back( tkn_SEMICOLON );
@@ -52,45 +81,89 @@ void tokenizer::scan( )
 
    if( r. lookahead == ':' )
    {
+      lookahead. push_back( tkn_COLON );
       r. moveforward( );
-      if( r. lookahead == '=' )
-      {
-         r. moveforward( );
-
-         lookahead. push_back( tkn_BECOMES );
-         return;
-      }
-
-      // A single : is not a token.
-
-      lookahead. push_back( tkn_SCANERROR );
       return;
    }
 
 
    if( r. lookahead == ',' )
    {
-      r. moveforward( );
       lookahead. push_back( tkn_COMMA );
+      r. moveforward( );
       return;
    }
 
 
    if( isletter( r. lookahead ) || r. lookahead == '_' )
    {
-      lookahead. push_back( tkn_IDENTIFIER );
-      lookahead. back( ). id. push_back( std::string( ));
-         // This appends an empty string to id, so that
-         // we have a string attribute now.
+      std::string name;
+      name.push_back(r.lookahead);
 
-      lookahead. back( ). id. back( ) += r. lookahead;
       r. moveforward( );
 
       while( isletter( r. lookahead ) || isdigit( r. lookahead ) ||
              r. lookahead == '_' )
       {
-         lookahead. back( ). id. back( ) += r. lookahead;
-         r. moveforward( );
+         name.push_back(r.lookahead);
+         r.moveforward();
+      }
+
+      // #cant_into_macros
+      if(name == "and")
+         lookahead.push_back(tkn_AND);
+      else if(name == "or")
+         lookahead.push_back(tkn_OR);
+      else if(name == "xor")
+         lookahead.push_back(tkn_XOR);
+      else if(name == "bool")
+         lookahead.push_back(tkn_TBOOL);
+      else if(name == "int")
+         lookahead.push_back(tkn_TINT);
+      else if(name == "float")
+         lookahead.push_back(tkn_TFLOAT);
+      else if(name == "string")
+         lookahead.push_back(tkn_TSTRING);
+      else if(name == "void")
+         lookahead.push_back(tkn_TVOID);
+      else if(name == "ref")
+         lookahead.push_back(tkn_TREF);
+      else if(name == "struct")
+         lookahead.push_back(tkn_STRUCT);
+      else if(name == "fun")
+         lookahead.push_back(tkn_FUN);
+      else if(name == "proc")
+         lookahead.push_back(tkn_PROC);
+      else if(name == "return")
+         lookahead.push_back(tkn_RETURN);
+      else if(name == "if")
+         lookahead.push_back(tkn_IF);
+      else if(name == "then")
+         lookahead.push_back(tkn_THEN);
+      else if(name == "else")
+         lookahead.push_back(tkn_ELSE);
+      else if(name == "for")
+         lookahead.push_back(tkn_FOR);
+      else if(name == "in")
+         lookahead.push_back(tkn_IN);
+      else if(name == "while")
+         lookahead.push_back(tkn_WHILE);
+      else if(name == "extern")
+         lookahead.push_back(tkn_EXTERN);
+      else if(name == "true")
+      {
+         lookahead.push_back(tkn_BOOL);
+         lookahead.back().boolV.push_back(true);
+      }
+      else if(name == "false")
+      {
+         lookahead.push_back(tkn_BOOL);
+         lookahead.back().boolV.push_back(false);
+      }
+      else
+      {
+         lookahead.push_back(tkn_IDENTIFIER);
+         lookahead.back().id.push_back(name);
       }
 
       return;
@@ -100,11 +173,7 @@ void tokenizer::scan( )
    if( isdigit( r. lookahead ))
    {
       std::string s;
-         // We keep the string, so that we can put it in
-         // a scanerror, if necessary.
-
-      // We do not allow the number to start with + or -, because
-      // this would bring us in conflict with the operators + and -.
+      bool isfloat = false;
 
       double val = 0.0;
       while( isdigit( r. lookahead ))
@@ -117,6 +186,7 @@ void tokenizer::scan( )
 
       if( r. lookahead == '.' )
       {
+         isfloat = true;
          double pos = 0.1;
 
          s += r. lookahead;
@@ -200,8 +270,16 @@ void tokenizer::scan( )
 
      }
 
-     lookahead. push_back( tkn_NUMBER );
-     lookahead. back( ). value. push_back( val );
+     if(isfloat)
+     {
+         lookahead.push_back(tkn_FLOAT);
+         lookahead.back().floatV.push_back(val);
+     }
+     else
+     {
+         lookahead.push_back(tkn_INT);
+         lookahead.back().intV.push_back((int)val);
+     }
      return;
    }
 
@@ -226,17 +304,75 @@ void tokenizer::scan( )
       return;
    }
 
+   if( r. lookahead == '%' )
+   {
+      lookahead. push_back( tkn_MOD );
+      r. moveforward( );
+      return;
+   }
+
    if( r. lookahead == '/' )
    {
-      lookahead. push_back( tkn_DIVIDES );
       r. moveforward( );
+      if( r. lookahead == '/' ) // comment
+      {
+          r. moveforward( );
+          while(r. lookahead != '\n')
+              r. moveforward( );
+          r. moveforward( );
+          scan();
+          //std::cout << "after comment\n";
+      }
+      else 
+      {
+          lookahead. push_back( tkn_DIVIDES );
+      }
+      return;
+   }
+
+   if( r. lookahead == '<' )
+   {
+      r. moveforward( );
+      if ( r. lookahead == '=' )
+      {
+          r. moveforward( );
+          lookahead. push_back( tkn_LESSEQ );
+          return;
+      }
+      lookahead. push_back( tkn_LESS );
+      return;
+   }
+
+   if( r. lookahead == '>' )
+   {
+      r. moveforward( );
+      if ( r. lookahead == '=' )
+      {
+          r. moveforward( );
+          lookahead. push_back( tkn_GREATEREQ );
+          return;
+      }
+      lookahead. push_back( tkn_GREATER );
+      return;
+   }
+
+   if ( r. lookahead == '=' )
+   {
+      r. moveforward( );
+      lookahead. push_back( tkn_EQ );
       return;
    }
 
    if( r. lookahead == '!' )
    {
-      lookahead. push_back( tkn_FACTORIAL );
       r. moveforward( );
+      if ( r. lookahead == '=' )
+      {
+          r. moveforward( );
+          lookahead. push_back( tkn_NOTEQ );
+          return;
+      }
+      lookahead. push_back( tkn_SCANERROR );
       return;
    }
 
@@ -254,6 +390,32 @@ void tokenizer::scan( )
       return;
    }
 
+   if( r. lookahead == '[' )
+   {
+      lookahead. push_back( tkn_LSQPAR );
+      r. moveforward( );
+      return;
+   }
+
+   if( r. lookahead == ']' )
+   {
+      lookahead. push_back( tkn_RSQPAR );
+      r. moveforward( );
+      return;
+   }
+   if( r. lookahead == '{' )
+   {
+      lookahead. push_back( tkn_LCURLY );
+      r. moveforward( );
+      return;
+   }
+
+   if( r. lookahead == '}' )
+   {
+      lookahead. push_back( tkn_RCURLY );
+      r. moveforward( );
+      return;
+   }
 
    // If we could not recognize anything, then we produce
    // a scan error.

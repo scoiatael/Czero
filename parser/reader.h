@@ -2,54 +2,39 @@
 #ifndef READER_INCLUDED
 #define READER_INCLUDED  1
 
-#include <cstdio>
 #include <iostream>
-
-
-// This is a very simple reader that reads only from standard
-// input.
-
 
 struct reader
 {
-   char lookahead;
+  int lookahead;
+  unsigned int linenumber = 1;
+  std::istream& stream;
 
-   unsigned int linenumber;
+  reader(std::istream& stream_) : stream(stream_) {
+    lookahead = stream.get( );
+  }
 
-
-   reader( );
-
-   bool hasmore( ) const;
-      // If hasmore( ) == false, then lookahead is not a reliable
-      // character anymore.
-
-   void moveforward( );
-
+  bool hasmore( ) const;
+  // If hasmore( ) == false, then lookahead is not a reliable
+  // character anymore.
+  void moveforward( );
 };
-
-
-
-inline reader::reader( )
-{
-   lookahead = getchar( );
-   linenumber = 1;
-}
 
 
 inline bool reader::hasmore( ) const
 {
-   return lookahead != EOF;
+  return lookahead != EOF;
 }
 
 
 inline void reader::moveforward( )
 {
-   if( hasmore( ))
-   {
+  if( hasmore( ))
+    {
       if( lookahead == '\n' )
-         ++ linenumber;
-      lookahead = getchar( );
-   }
+        ++ linenumber;
+      lookahead = stream.get();
+    }
 }
 
 

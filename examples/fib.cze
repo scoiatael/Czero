@@ -1,0 +1,18 @@
+extern printf(string format, int code1, int code2) : void;
+
+fun fib(int n) : int {
+  if (n < 2)
+    {
+      return 1;
+    }
+  else
+    {
+      return fib(n - 2) + fib(n - 1);
+    }
+}
+
+proc main() {
+  int num;
+  num = 10;
+  printf("Fib %d -> %d\n", num, fib(num));
+}

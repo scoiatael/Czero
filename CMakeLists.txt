@@ -8,6 +8,7 @@ set(maphoon_root ${CMAKE_CURRENT_BINARY_DIR}/maphoon)
 set(bin ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(parser ${CMAKE_CURRENT_SOURCE_DIR}/parser)
 set(util ${CMAKE_CURRENT_SOURCE_DIR}/util)
+set(syntax ${CMAKE_CURRENT_SOURCE_DIR}/syntax)
 set(build ${CMAKE_CURRENT_SOURCE_DIR}/build)
 
 set(parser_files
@@ -17,9 +18,14 @@ set(parser_files
   token.h)
 
 set(source
-  czero.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/czero.cpp
+  ${syntax}/ast.cpp
+  ${syntax}/pretty_print.cpp
+  ${syntax}/checker.cpp
+  ${syntax}/compiler.cpp
   ${util}/ir_compiler.cpp
   ${util}/ir_generator.cpp
+  ${parser}/varstore.cpp
   ${parser}/tokenizer.cpp)
 
 set(maphoon_files "")
@@ -32,7 +38,7 @@ foreach(file ${parser_files})
   list(APPEND final_parser_files ${parser}/${file})
 endforeach(file)
 
-find_package( Boost 1.40 COMPONENTS program_options filesystem system REQUIRED )
+find_package( Boost 1.40 COMPONENTS program_options filesystem system regex REQUIRED )
 include_directories( ${Boost_INCLUDE_DIR} )
 
 
@@ -53,7 +59,7 @@ add_custom_command(
   OUTPUT ${maphoon_files}
   COMMAND ./maphoon ${parser}/parser.m
   DEPENDS Maphoon
-  DEPENDS ${parser}/parser.m
+  DEPENDS ${parser}/parser.m ${parser}/varstore.h
   WORKING_DIRECTORY ${maphoon_root}/bin)
 
 foreach(index 0 1 2 3)
