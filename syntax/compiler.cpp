@@ -5,6 +5,7 @@ class Compiler {
   llvm::StringMap<llvm::Function*> functions;
   llvm::StringMap<llvm::Value*> variables;
   llvm::Function* current_function;
+  bool block_returns = false;
 
   llvm::Type* llvm_type_for(ast::types::Type type) {
     switch(type) {
@@ -218,12 +219,15 @@ class Compiler {
   int compile_return(ast::Return* retrn) {
     assert(retrn != nullptr);
     assert(retrn->value.get() != nullptr);
+    if(this->block_returns) return EXIT_SUCCESS;
+
     if(retrn->value->type == ast::types::Void) {
       this->ctx.Builder.CreateRetVoid();
     } else {
       auto val = operation(retrn->value.get());
       this->ctx.Builder.CreateRet(val);
     }
+    this->block_returns = true;
     return EXIT_SUCCESS;
   }
 
@@ -247,12 +251,15 @@ class Compiler {
     auto jump_condition = operation(branch->condition.get());
     this->ctx.Builder.CreateCondBr(jump_condition, then_block, else_block);
     this->ctx.Builder.SetInsertPoint(then_block);
+    this->block_returns = false;
     compile_body(branch->then_);
-    this->ctx.Builder.CreateBr(exit_block);
+    if(!this->block_returns) this->ctx.Builder.CreateBr(exit_block);
     this->ctx.Builder.SetInsertPoint(else_block);
+    this->block_returns = false;
     compile_body(branch->else_);
-    this->ctx.Builder.CreateBr(exit_block);
+    if(!this->block_returns) this->ctx.Builder.CreateBr(exit_block);
     this->ctx.Builder.SetInsertPoint(exit_block);
+    this->block_returns = false;
     return EXIT_SUCCESS;
   }
 
@@ -283,9 +290,11 @@ class Compiler {
     auto jump_condition = operation(whil->condition.get());
     this->ctx.Builder.CreateCondBr(jump_condition, body_block, exit_block);
     this->ctx.Builder.SetInsertPoint(body_block);
+    this->block_returns = false;
     compile_body(whil->body);
-    this->ctx.Builder.CreateBr(condition_block);
+    if(!this->block_returns) this->ctx.Builder.CreateBr(condition_block);
     this->ctx.Builder.SetInsertPoint(exit_block);
+    this->block_returns = false;
     return EXIT_SUCCESS;
   }
 
@@ -337,6 +346,7 @@ class Compiler {
 
   int compile_func(ast::Func* func) {
     assert(func != nullptr);
+    this->block_returns = false;
     auto decl = compile_extern(dynamic_cast<ast::Extern*>(func));
 
     auto block = llvm::BasicBlock::Create(this->ctx.llvmContext, "entry", decl);

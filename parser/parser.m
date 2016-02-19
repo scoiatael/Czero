@@ -57,12 +57,12 @@
 %token BOOL INT FLOAT STRING REF
 %token TBOOL TINT TFLOAT TSTRING TREF
 %token STRUCT FUN PROC RETURN EXTERN
-%token IF THEN ELSE FOR IN WHILE 
+%token IF THEN ELSE FOR IN WHILE
 
 
 %token STATEMENT STATEMENTS
 %token DECLAR DECLARS
-%token TOP 
+%token TOP
 %token INSTR
 %token DECL
 %token EXPR
@@ -174,7 +174,7 @@
 %       | STATEMENTS
 
     token i = tkn_INSTR;
-    i.instP.push_back(instP_t(std::list<ast::Variable>(), 
+    i.instP.push_back(instP_t(std::list<ast::Variable>(),
                 STATEMENTS1->statemP));
     return i;
 
@@ -193,7 +193,7 @@
 %       ;
 
 
-% DECLARS : DECLAR SEMICOLON 
+% DECLARS : DECLAR SEMICOLON
 
     token d = tkn_DECLARS;
     d.declP.push_back(DECLAR1->declP.front());
@@ -208,7 +208,7 @@
 
 
 // empty argument lists
-% ARGSS : 
+% ARGSS :
 
     token t = tkn_ARGSS;
     return t;
@@ -217,11 +217,11 @@
 
     ARGS1->type = tkn_ARGSS;
     return ARGS1;
-    
+
 %       ;
 
 
-% ARGS : DECLAR 
+% ARGS : DECLAR
 
     token a = tkn_ARGS;
     a.declP.push_back(DECLAR1->declP.front());
@@ -235,7 +235,7 @@
 %      ;
 
 
-% DECLAR : TYPE IDENTIFIER 
+% DECLAR : TYPE IDENTIFIER
 
     token d = tkn_DECLAR;
     ast::Variable var(IDENTIFIER2->id.front(), TYPE1->typeP.front());
@@ -259,7 +259,7 @@
 %            ;
 
 
-% STATEMENT : CALL SEMICOLON 
+% STATEMENT : CALL SEMICOLON
 
     token s = tkn_STATEMENT;
     ast::VoidContext vc(CALL1->callP.front());
@@ -393,25 +393,25 @@
 % OP : PLUS
 
     token op = tkn_OP;
-    op.id.push_back("+");
+    op.id.push_back("add");
     return op;
 
 %    | MINUS
 
     token op = tkn_OP;
-    op.id.push_back("-");
+    op.id.push_back("sub");
     return op;
 
 %    | TIMES
 
     token op = tkn_OP;
-    op.id.push_back("*");
+    op.id.push_back("mul");
     return op;
 
 %    | DIVIDES
 
     token op = tkn_OP;
-    op.id.push_back("/");
+    op.id.push_back("div");
     return op;
 
 %    | AND
@@ -435,7 +435,7 @@
 %    | LESS
 
     token op = tkn_OP;
-    op.id.push_back("<");
+    op.id.push_back("lt");
     return op;
 
 %    | LESSEQ
@@ -459,7 +459,7 @@
 %    | EQ EQ
 
     token op = tkn_OP;
-    op.id.push_back("=");
+    op.id.push_back("eq");
     return op;
 
 %    | NOTEQ
@@ -495,4 +495,3 @@
     return call;
 
 %      ;
-
