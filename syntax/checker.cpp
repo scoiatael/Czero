@@ -5,6 +5,22 @@ class Checker {
   llvm::StringMap<ast::Variable> variables;
   ast::Extern* current_function;
 
+  std::shared_ptr<ast::types::abstract::Value>
+      default_value_for(ast::types::Type type) {
+      switch(type) {
+          case ast::types::Bool:
+              return std::make_shared<ast::types::BoolValue>(false);
+          case ast::types::Float32:
+              return std::make_shared<ast::types::FloatValue>(0.0);
+          case ast::types::Int32:
+              return std::make_shared<ast::types::IntValue>(0);
+          case ast::types::String:
+              return std::make_shared<ast::types::StringValue>("");
+          case ast::types::Void:
+              return std::make_shared<ast::types::VoidValue>();
+      };
+  }
+
   void type_mismatch(ast::types::Type ltype, ast::types::Type rtype) {
     std::cout << "\t(expected ";
     pretty_print::type(std::cout, ltype);
@@ -291,6 +307,10 @@ class Checker {
     check_body(func->body);
 
     // TODO: check for return value?
+    auto return_ = std::make_shared<ast::Return>();
+    return_->value =
+        std::make_shared<ast::Constant>(default_value_for(func->return_value));
+    func->body.push_back(return_);
     this->current_function = nullptr;
     variables.clear();
     return EXIT_SUCCESS;

@@ -83,7 +83,7 @@ namespace ast {
 
     struct Operation : public Node {
       virtual ~Operation() {}
-      types::Type type;
+      types::Type type = types::Poison;
     };
   }
 
@@ -105,7 +105,7 @@ namespace ast {
     Identifier identifier;
     types::Type return_value;
     std::list<Variable> arguments;
-    bool variadic;
+    bool variadic = false;
     RealNodeType node_type() const { return ExternNode; }
   };
 
@@ -184,6 +184,9 @@ namespace ast {
 
   struct Program {
     std::list<std::shared_ptr<abstract::Declaration>> body;
+    Program() = default;
+    explicit Program(std::list<std::shared_ptr<abstract::Declaration>>& body_)
+        : body(body_) { }
   };
 }
 

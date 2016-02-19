@@ -18,7 +18,7 @@ namespace ir_generator {
   struct Options {
     bool verbose = false;
     bool verify = true;
-    bool force_overwrite = false;
+    bool force_overwrite = true;
     llvm::raw_ostream& err = llvm::errs();
     llvm::raw_ostream& log = llvm::outs();
   };

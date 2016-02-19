@@ -249,8 +249,11 @@ public:
     case ast::types::Void:
       stream << "[Void]";
       break;
+    case ast::types::Poison:
+      stream << "[Poison]";
+      break;
     default:
-      stream << "[Unknown Value]";
+      stream << "[Unknown Value " << type << "]";
     }
     return stream;
   }

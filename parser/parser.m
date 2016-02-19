@@ -35,7 +35,7 @@
 %constraint ARGS  declP 0
 %constraint ARGSS declP 0
 
-%attribute topP     ast::Func
+%attribute topP     std::shared_ptr<ast::abstract::Declaration>
 %constraint TOP topP 1 2
 %constraint PROG topP 0
 
@@ -56,7 +56,7 @@
 %token LCURLY RCURLY
 %token BOOL INT FLOAT STRING REF
 %token TBOOL TINT TFLOAT TSTRING TREF
-%token STRUCT FUN PROC RETURN
+%token STRUCT FUN PROC RETURN EXTERN
 %token IF THEN ELSE FOR IN WHILE 
 
 
@@ -120,6 +120,12 @@
     t.typeP.push_back(ast::types::String);
     return t;
 
+%      | TVOID
+
+    token t = tkn_TYPE;
+    t.typeP.push_back(ast::types::Void);
+    return t;
+
 %      ;
 
 % TOP : FUN IDENTIFIER LPAR ARGSS RPAR COLON TYPE LCURLY INSTR RCURLY
@@ -131,7 +137,7 @@
     f.arguments = ARGSS4->declP;
     f.body = INSTR9->instP.front().second;
     f.local_variables = INSTR9->instP.front().first;
-    t.topP.push_back(f);
+    t.topP.push_back(std::make_shared<ast::Func>(f));
     return t;
 
 %     | PROC IDENTIFIER LPAR ARGSS RPAR LCURLY INSTR RCURLY
@@ -143,7 +149,17 @@
     f.arguments = ARGSS4->declP;
     f.body = INSTR7->instP.front().second;
     f.local_variables = INSTR7->instP.front().first;
-    t.topP.push_back(f);
+    t.topP.push_back(std::make_shared<ast::Func>(f));
+    return t;
+
+%     | EXTERN IDENTIFIER LPAR ARGSS RPAR COLON TYPE SEMICOLON
+
+    token t = tkn_TOP;
+    ast::Extern f;
+    f.identifier = IDENTIFIER2->id.front();
+    f.return_value = TYPE7->typeP.front();
+    f.arguments = ARGSS4->declP;
+    t.topP.push_back(std::make_shared<ast::Extern>(f));
     return t;
 
 %     ;

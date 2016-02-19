@@ -118,6 +118,8 @@ void tokenizer::scan( )
          lookahead.push_back(tkn_TFLOAT);
       else if(name == "string")
          lookahead.push_back(tkn_TSTRING);
+      else if(name == "void")
+         lookahead.push_back(tkn_TVOID);
       else if(name == "ref")
          lookahead.push_back(tkn_TREF);
       else if(name == "struct")
@@ -140,6 +142,8 @@ void tokenizer::scan( )
          lookahead.push_back(tkn_IN);
       else if(name == "while")
          lookahead.push_back(tkn_WHILE);
+      else if(name == "extern")
+         lookahead.push_back(tkn_EXTERN);
       else if(name == "true")
       {
          lookahead.push_back(tkn_BOOL);
