@@ -1,5 +1,5 @@
-extern printf(string format) : void;
+extern printf(string format, int code) : void;
 fun main() : int
 {
-    printf("Hello, world\n");
+    printf("Hello, world: %d\n", 111);
 }

@@ -8,3 +8,15 @@ fun fib(int n) : int {
         return 0;
     }
 }
+
+extern getline() : string;
+extern atoi(string str) : int;
+extern printf(string format, int code1, int code2) : void;
+
+proc main() {
+     string line;
+     int num;
+     line = getline();
+     num = atoi(line);
+     printf("Fib %d -> %d", num, fib(num));
+}
