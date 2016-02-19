@@ -21,6 +21,7 @@ struct tokenizer
    void syntaxerror( );
       // Report syntax error to the user.
 
+  tokenizer(std::istream& stream) : r(stream) { }
 };
 
 
