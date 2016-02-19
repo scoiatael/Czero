@@ -1,18 +1,20 @@
 extern printf(string format, int code1, int code2) : void;
 
 fun fib(int n) : int {
-  if (n < 2)
-    {
-      return 1;
-    }
-  else
-    {
-      return fib(n - 2) + fib(n - 1);
-    }
+  int f1;
+  int f2;
+  f1 = 1;
+  f2 = 1;
+  while(0 < n) {
+    f1 = f1 + f2;
+    f2 = f1 - f2;
+    n = n - 1;
+  }
+  return f1;
 }
 
 proc main() {
   int num;
-  num = 10;
+  num = 100;
   printf("Fib %d -> %d", num, fib(num));
 }
