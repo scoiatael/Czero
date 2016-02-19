@@ -6,19 +6,21 @@ class Checker {
   ast::Extern* current_function;
 
   std::shared_ptr<ast::types::abstract::Value>
-      default_value_for(ast::types::Type type) {
-      switch(type) {
-          case ast::types::Bool:
-              return std::make_shared<ast::types::BoolValue>(false);
-          case ast::types::Float32:
-              return std::make_shared<ast::types::FloatValue>(0.0);
-          case ast::types::Int32:
-              return std::make_shared<ast::types::IntValue>(0);
-          case ast::types::String:
-              return std::make_shared<ast::types::StringValue>("");
-          case ast::types::Void:
-              return std::make_shared<ast::types::VoidValue>();
-      };
+  default_value_for(ast::types::Type type) {
+    switch(type) {
+    case ast::types::Bool:
+      return std::make_shared<ast::types::BoolValue>(false);
+    case ast::types::Float32:
+      return std::make_shared<ast::types::FloatValue>(0.0);
+    case ast::types::Int32:
+      return std::make_shared<ast::types::IntValue>(0);
+    case ast::types::String:
+      return std::make_shared<ast::types::StringValue>("");
+    case ast::types::Void:
+      return std::make_shared<ast::types::VoidValue>();
+    default:
+      assert(false);
+    };
   }
 
   void type_mismatch(ast::types::Type ltype, ast::types::Type rtype) {
@@ -125,13 +127,12 @@ class Checker {
     }
     std::cout << "Unknown unary operation "
               << un_op->operator_
-              << " of type "
-              << value->type
-              << " -> "
-              << un_op->type
-              << " at "
-              << un_op->id
-              << std::endl;
+              << " of type ";
+    pretty_print::type(std::cout, value->type);
+    std::cout  << " -> ";
+    pretty_print::type(std::cout, un_op-> type);
+    print_id(un_op->id);
+    std::cout << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -155,15 +156,14 @@ class Checker {
     }
     std::cout << "Unknown binary operation "
               << bin_op->operator_
-              << " of type "
-              << lhs->type
-              << " * "
-              << rhs->type
-              << " -> "
-              << bin_op->type
-              << " at "
-              << bin_op->id
-              << std::endl;
+              << " of type ";
+    pretty_print::type(std::cout, lhs->type);
+    std::cout << " * ";
+    pretty_print::type(std::cout, rhs->type);
+    std::cout << " -> ";
+    pretty_print::type(std::cout, bin_op->type);
+    print_id(bin_op->id);
+    std::cout  << std::endl;
     return EXIT_FAILURE;
   }
 

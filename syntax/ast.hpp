@@ -138,7 +138,7 @@ namespace ast {
 
   struct BinOp : public abstract::Operation {
     Identifier operator_;
-    types::Type from;
+    types::Type from = ast::types::Poison;
     std::shared_ptr<abstract::Operation> left;
     std::shared_ptr<abstract::Operation> right;
     RealNodeType node_type() const { return BinOpNode; }
