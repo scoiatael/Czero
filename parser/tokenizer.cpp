@@ -126,6 +126,8 @@ void tokenizer::scan( )
          lookahead.push_back(tkn_FUN);
       else if(name == "proc")
          lookahead.push_back(tkn_PROC);
+      else if(name == "return")
+         lookahead.push_back(tkn_RETURN);
       else if(name == "if")
          lookahead.push_back(tkn_IF);
       else if(name == "then")
@@ -162,11 +164,6 @@ void tokenizer::scan( )
    {
       std::string s;
       bool isfloat = false;
-         // We keep the string, so that we can put it in
-         // a scanerror, if necessary.
-
-      // We do not allow the number to start with + or -, because
-      // this would bring us in conflict with the operators + and -.
 
       double val = 0.0;
       while( isdigit( r. lookahead ))
@@ -297,10 +294,28 @@ void tokenizer::scan( )
       return;
    }
 
+   if( r. lookahead == '%' )
+   {
+      lookahead. push_back( tkn_MOD );
+      r. moveforward( );
+      return;
+   }
+
    if( r. lookahead == '/' )
    {
-      lookahead. push_back( tkn_DIVIDES );
       r. moveforward( );
+      if( r. lookahead == '/' ) // comment
+      {
+          r. moveforward( );
+          while(r. lookahead != '\n')
+              r. moveforward( );
+          r. moveforward( );
+          std::cout << "after comment\n";
+      }
+      else 
+      {
+          lookahead. push_back( tkn_DIVIDES );
+      }
       return;
    }
 

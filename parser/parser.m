@@ -32,7 +32,8 @@
 %attribute declP     ast::Variable
 %constraint DECLAR declP 1 2
 %constraint DECLARS declP 0
-%constraint ARGS declP 0
+%constraint ARGS  declP 0
+%constraint ARGSS declP 0
 
 %attribute topP     ast::Func
 %constraint TOP topP 1 2
@@ -40,7 +41,6 @@
 
 %attribute instP    instP_t
 %constraint INSTR instP 1 2
-%constraint PROG instP 0
 
 %attribute typeP    ast::types::Type
 %constraint TYPE typeP 1 2
@@ -50,13 +50,13 @@
 %token SEMICOLON COLON COMMA
 %token IDENTIFIER INT FLOAT
 %token AND OR XOR LESS LESSEQ GREATER GREATEREQ EQ NOTEQ
-%token PLUS TIMES MINUS DIVIDES
+%token PLUS TIMES MINUS DIVIDES MOD
 %token LPAR RPAR
 %token LSQPAR RSQPAR
 %token LCURLY RCURLY
 %token BOOL INT FLOAT STRING REF
 %token TBOOL TINT TFLOAT TSTRING TREF
-%token STRUCT FUN PROC
+%token STRUCT FUN PROC RETURN
 %token IF THEN ELSE FOR IN WHILE 
 
 
@@ -68,7 +68,7 @@
 %token EXPR
 %token TYPE
 %token FIELDS
-%token ARGS
+%token ARGS ARGSS
 %token EXPRESS
 %token CALL
 %token OP
@@ -86,12 +86,12 @@
 % PROG : TOP
 
     token p = tkn_PROG;
-    p.instP = TOP1->instP;
+    p.topP = TOP1->topP;
     return p;
 
 %      | PROG TOP
 
-    PROG1->instP.push_back(TOP2->instP.front());
+    PROG1->topP.push_back(TOP2->topP.front());
     return PROG1;
 
 %      ;
@@ -122,25 +122,25 @@
 
 %      ;
 
-% TOP : FUN IDENTIFIER LPAR ARGS RPAR COLON TYPE LCURLY INSTR RCURLY
+% TOP : FUN IDENTIFIER LPAR ARGSS RPAR COLON TYPE LCURLY INSTR RCURLY
 
     token t = tkn_TOP;
     ast::Func f;
     f.identifier = IDENTIFIER2->id.front();
     f.return_value = TYPE7->typeP.front();
-    f.arguments = ARGS4->declP;
+    f.arguments = ARGSS4->declP;
     f.body = INSTR9->instP.front().second;
     f.local_variables = INSTR9->instP.front().first;
     t.topP.push_back(f);
     return t;
 
-%     | PROC IDENTIFIER LPAR ARGS RPAR LCURLY INSTR RCURLY
+%     | PROC IDENTIFIER LPAR ARGSS RPAR LCURLY INSTR RCURLY
 
     token t = tkn_TOP;
     ast::Func f;
     f.identifier = IDENTIFIER2->id.front();
     f.return_value = ast::types::Void;
-    f.arguments = ARGS4->declP;
+    f.arguments = ARGSS4->declP;
     f.body = INSTR7->instP.front().second;
     f.local_variables = INSTR7->instP.front().first;
     t.topP.push_back(f);
@@ -175,28 +175,38 @@
 
     token d = tkn_DECLARS;
     d.declP.push_back(DECLAR1->declP.front());
-    //pretty_print::node(std::cout, *d.declP.front().get()); 
     return d;
 
 %         | DECLARS DECLAR SEMICOLON
 
-    //pretty_print::node(std::cout, *DECLAR2->declP.front().get()); 
     DECLARS1->declP.push_back(DECLAR2->declP.front());
     return DECLARS1;
 
 %         ;
 
 
+// empty argument lists
+% ARGSS : 
+
+    token t = tkn_ARGSS;
+    return t;
+
+%       | ARGS
+
+    ARGS1->type = tkn_ARGSS;
+    return ARGS1;
+    
+%       ;
+
+
 % ARGS : DECLAR 
 
     token a = tkn_ARGS;
     a.declP.push_back(DECLAR1->declP.front());
-    //pretty_print::node(std::cout, *a.declP.front().get()); 
     return a;
 
 %      | ARGS COMMA DECLAR
 
-    //pretty_print::node(std::cout, *DECLAR3->declP.front().get()); 
     ARGS1->declP.push_back(DECLAR3->declP.front());
     return ARGS1;
 
@@ -217,42 +227,29 @@
 
     token s = tkn_STATEMENTS;
     s.statemP.push_back(STATEMENT1->statemP.front());
-    //pretty_print::node(std::cout, *s.statemP.front().get()); 
     return s;
 
-%            | STATEMENTS SEMICOLON STATEMENT
+%            | STATEMENTS STATEMENT
 
-    //pretty_print::node(std::cout, *STATEMENT3->statemP.front().get()); 
-    STATEMENTS1->statemP.push_back(STATEMENT3->statemP.front());
+    STATEMENTS1->statemP.push_back(STATEMENT2->statemP.front());
     return STATEMENTS1;
 
 %            ;
 
 
-% STATEMENT : CALL 
+% STATEMENT : CALL SEMICOLON 
 
     token s = tkn_STATEMENT;
     ast::VoidContext vc(CALL1->callP.front());
     s.statemP.push_back(std::make_shared<ast::VoidContext>(vc));
     return s;
 
-%      | IDENTIFIER PLUS EQ EXPR
-    // XXX something broken
+%      | IDENTIFIER EQ EXPR SEMICOLON
+
     token s = tkn_STATEMENT;
     ast::Assignment ass;
-    ast::Variable var;
-    ast::BinOp binop;
-
-    std::cout << "cccC\n" << IDENTIFIER1->id.front() ;
-    //var.identifier = IDENTIFIER1->id.front();
-
-    //binop.operator_ = PLUS2->id.front();
-    //binop.left = std::make_shared<ast::Variable>(var);
-    //binop.right = EXPR4->exprP.front();
-
-    //ass.identifier = var.identifier;
-    //ass.value = std::make_shared<ast::BinOp>(binop);
-
+    ass.identifier = IDENTIFIER1->id.front();
+    ass.value = EXPR3->exprP.front();
     s.statemP.push_back(std::make_shared<ast::Assignment>(ass));
     return s;
 
@@ -265,6 +262,16 @@
     s.statemP.push_back(std::make_shared<ast::Branch>(branch));
     return s;
 
+%      | IF LPAR EXPR RPAR LCURLY STATEMENTS RCURLY ELSE LCURLY STATEMENTS RCURLY
+
+    token s = tkn_STATEMENT;
+    ast::Branch branch;
+    branch.condition = EXPR3->exprP.front();
+    branch.then_ = STATEMENTS6->statemP;
+    branch.else_ = STATEMENTS10->statemP;
+    s.statemP.push_back(std::make_shared<ast::Branch>(branch));
+    return s;
+
 %      | WHILE LPAR EXPR RPAR LCURLY STATEMENTS RCURLY
 
     token s = tkn_STATEMENT;
@@ -272,6 +279,14 @@
     w.condition = EXPR3->exprP.front();
     w.body = STATEMENTS6->statemP;
     s.statemP.push_back(std::make_shared<ast::While>(w));
+    return s;
+
+%      | RETURN EXPR SEMICOLON
+
+    token s = tkn_STATEMENT;
+    ast::Return r;
+    r.value = EXPR2->exprP.front();
+    s.statemP.push_back(std::make_shared<ast::Return>(r));
     return s;
 
 %      ;
@@ -342,14 +357,12 @@
 % EXPRESS : EXPRESS COMMA EXPR
 
     EXPRESS1->exprP.push_back(EXPR3->exprP.front());
-    //pretty_print::node(std::cout, *EXPR3->exprP.front().get()); 
     return EXPRESS1;
 
 %         | EXPR
 
     token e = tkn_EXPRESS;
     e.exprP.push_back(EXPR1->exprP.front());
-    //pretty_print::node(std::cout, *e.exprP.front().get()); 
     return e;
 
 %         ;
@@ -421,7 +434,7 @@
     op.id.push_back(">=");
     return op;
 
-%    | EQ
+%    | EQ EQ
 
     token op = tkn_OP;
     op.id.push_back("=");
@@ -431,6 +444,12 @@
 
     token op = tkn_OP;
     op.id.push_back("!=");
+    return op;
+
+%    | MOD
+
+    token op = tkn_OP;
+    op.id.push_back("%");
     return op;
 
 %    ;

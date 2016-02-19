@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
 //#ifdef TEST_PARSER
     varstore vs;
     parser(tt, vs, tkn_PROG, 10);
+    std::cout << tt.lookahead.front();
     ASSERT(tt.lookahead.size());
 //#endif
 

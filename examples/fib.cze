@@ -1,8 +1,10 @@
-fun fib(n : int) : int {
-    if (n >= 0) // comparison operators are overloaded functions that return bool
+fun fib(int n) : int {
+    if (n >= 0) 
+    {
         return fib(n - 2) + fib(n - 1);
+    }
     else
+    {
         return 0;
-    // how to make sure function always returns with a value ?
-    // one needs to perform some abstract interpretation!
+    }
 }
