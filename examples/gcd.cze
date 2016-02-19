@@ -1,5 +1,5 @@
 fun gcd (int a, int b) : int {
-    int c;  
+    int c;  // asdf
     while (a != 0) {
         c = a;
         a = b % a;

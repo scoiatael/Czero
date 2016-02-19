@@ -310,7 +310,8 @@ void tokenizer::scan( )
           while(r. lookahead != '\n')
               r. moveforward( );
           r. moveforward( );
-          std::cout << "after comment\n";
+          scan();
+          //std::cout << "after comment\n";
       }
       else 
       {

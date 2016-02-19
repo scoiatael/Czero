@@ -168,6 +168,12 @@
     i.instP.push_back(instP_t(DECLARS1->declP, ast::Body()));
     return i;
 
+%       |
+
+    token i = tkn_INSTR;
+    i.instP.push_back(instP_t(std::list<ast::Variable>(), ast::Body()));
+    return i;
+
 %       ;
 
 
